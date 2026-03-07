@@ -1,5 +1,5 @@
+import { sortedServicesData } from "@/lib/database/dummyDbData";
 import HomeServicesSlider from "./HomeServicesSlider";
-import { sortedServicesData } from "../../services/page";
 
 export default function HomeServices() {
   return (

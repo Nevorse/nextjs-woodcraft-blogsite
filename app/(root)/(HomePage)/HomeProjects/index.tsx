@@ -1,5 +1,5 @@
 import CardComponent from "@/components/ui/cards/CardComponent";
-import { sortedProjectsData } from "../../projects/page";
+import { sortedProjectsData } from "@/lib/database/dummyDbData";
 import Photo1 from "@/public/images/Photo1.webp";
 
 

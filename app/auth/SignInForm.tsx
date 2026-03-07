@@ -17,7 +17,7 @@ export default function SignInForm({
 }: {
   isRegistrationOpen?: boolean;
 }) {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [signMode, setSignMode] = useState<"signin" | "signup">("signin");
   const router = useRouter();
   const {
     handleSubmit,
@@ -35,7 +35,7 @@ export default function SignInForm({
   });
 
   const onSubmit = async (data: SignInUpFormValues) => {
-    if (mode === "signin") {
+    if (signMode === "signin") {
       const result = await signInAction(data.mail, data.password);
       if (result.success === true) {
         router.push("/admin");
@@ -44,12 +44,8 @@ export default function SignInForm({
       } else {
         toast.error(`${result.message}`);
       }
-    } else if (mode === "signup" && isRegistrationOpen) {
-      const result = await signUpAction(
-        data.mail,
-        data.password,
-        data.name as string,
-      );
+    } else if (signMode === "signup" && isRegistrationOpen) {
+      const result = await signUpAction(data.mail, data.password, data.name as string);
       console.log(result);
       if (result.success === true) {
         router.push("/admin");
@@ -64,14 +60,14 @@ export default function SignInForm({
   return (
     <div className="w-full max-w-sm	flex flex-col gap-6 px-6">
       <div className="text-2xl">
-        {mode === "signin" ? "Hesabınıza giriş yapın" : "Yeni hesap oluşturun"}
+        {signMode === "signin" ? "Hesabınıza giriş yapın" : "Yeni hesap oluşturun"}
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col items-center justify-center gap-6"
       >
         <div className="flex flex-col w-full gap-8">
-          {mode === "signup" && (
+          {signMode === "signup" && (
             <Input
               {...register("name")}
               name={"name"}
@@ -95,17 +91,21 @@ export default function SignInForm({
           />
         </div>
 
-        <SubmitButton isSubmitting={isSubmitting} />
+        <SubmitButton
+          isSubmitting={isSubmitting}
+          buttonName={signMode === "signin" ? "Giriş Yap" : "Kayıt Ol"}
+        />
+
         {isRegistrationOpen && (
           <div className="text-sm">
             <button
               type="button"
               className="text-emerald-600 underline cursor-pointer"
               onClick={() => {
-                setMode(mode === "signin" ? "signup" : "signin");
+                setSignMode((prev) => (prev === "signin" ? "signup" : "signin"));
               }}
             >
-              {mode === "signin" ? "Kayıt olun" : "Giriş yapın"}
+              {signMode === "signin" ? "Kayıt olun" : "Giriş yapın"}
             </button>
           </div>
         )}
