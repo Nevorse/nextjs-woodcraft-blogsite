@@ -1,5 +1,7 @@
 import CardComponent from "@/components/ui/cards/CardComponent";
 import { sortedProjectsData } from "../../projects/page";
+import Photo1 from "@/public/images/Photo1.webp";
+
 
 export default function HomeProjects() {
   return (
@@ -17,7 +19,7 @@ export default function HomeProjects() {
             key={index}
             title={project.folderTitle}
             href={`projects/${project.folderTitle}`}
-            image={project?.folderImage}
+            image={project.folderImage || Photo1.src}
           />
         ))}
       </div>
