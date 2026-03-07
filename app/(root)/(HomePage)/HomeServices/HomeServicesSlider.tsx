@@ -7,8 +7,8 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Photo1 from "@/public/images/Photo1.webp";
 import Image from "next/image";
-import { dummySerivcesProps } from "../../services/page";
 import SmoothLink from "@/components/ui/general/SmoothLink";
+import { dummySerivcesProps } from "@/lib/database/dummyDbData";
 
 export default function HomeServicesSlider({
   slideData,

@@ -1,5 +1,5 @@
 import CardComponent from "@/components/ui/cards/CardComponent";
-import { sortedProjectsData } from "../page";
+import { sortedProjectsData } from "@/lib/database/dummyDbData";
 import { notFound } from "next/navigation";
 
 export default async function ProjectsFolderPage({

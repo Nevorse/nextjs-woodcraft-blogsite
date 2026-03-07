@@ -1,12 +1,12 @@
 "use client";
 import { use, useState, useRef, useEffect } from "react";
-import { sortedProjectsData } from "../../page";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Photo1 from "@/public/images/Photo1.webp";
 import SmoothLink from "@/components/ui/general/SmoothLink";
 import { BreadcrumbNav } from "@/components/ui/general/BreadcrumbNav";
 import SingleAlbumModal from "@/components/main-layout/modals/SingleAlbumModal";
+import { sortedProjectsData } from "@/lib/database/dummyDbData";
 
 export default function SingleProjectAlbum({
   params,
