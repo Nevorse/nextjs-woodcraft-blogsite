@@ -608,7 +608,7 @@ export default function ProjectsPage() {
               key={index}
               title={project.folderTitle}
               href={`/projects/${project.folderTitle}`}
-              image={project.folderImage || Photo1.src}
+              image={project.folderImage}
             />
           ))}
         </div>
