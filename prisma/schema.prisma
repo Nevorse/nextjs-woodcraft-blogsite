@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+//////////////////////////////////////////////
+model SiteSettings {
+  id                String @id
+
+  serviceAlbumLimit Int @default(0)
+  projectAlbumLimit Int @default(6)
+
+  coverImageLimit   Int @default(3)
+  coverTextLimit   Int @default(3)
+
+  isRegistrationOpen Boolean @default(false)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+enum FolderType {
+  PROJECT_FOLDER
+}
+
+enum AlbumType {
+  COVER_ALBUM
+  SERVICE_ALBUM
+  PROJECT_ALBUM
+}
+
+model AlbumFolder {
+  id        String        @id @default(cuid())
+  title     String
+  slug      String        @unique
+  order     Int           @default(0)
+  type      FolderType    @default(PROJECT_FOLDER)
+  
+  folderImage Image?      @relation("FolderToImage")
+  albums    Album[]
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([type, order])
+  @@map("album_folder")
+}
+
+model Album {
+  id        String        @id @default(cuid())
+  title     String
+  content   Json?       
+  slug      String        @unique
+  order     Int           @default(0)
+  type      AlbumType
+
+  images    Image[]       @relation("AlbumToImage")
+  folderId  String?
+  folder    AlbumFolder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([type, order])
+  @@index([folderId, order])
+  @@map("album")
+}
+
+model Image {
+  id        String         @id @default(cuid())
+  uuid      String         @unique
+  order     Int            @default(0)
+
+  albumId   String?
+  album     Album?         @relation("AlbumToImage",fields: [albumId], references: [id], onDelete: Cascade)
+
+  folderId  String?        @unique
+  albumFolder AlbumFolder? @relation("FolderToImage", fields: [folderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([albumId, order])
+  @@map("image")
+}

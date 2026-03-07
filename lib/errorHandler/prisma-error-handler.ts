@@ -1,0 +1,56 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { Prisma } from "../generated/prisma/client";
+
+function getErrorMessageForDb(error: unknown): string {
+  // Prisma hatası
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    const messages: Record<string, string> = {
+      // Create/Update
+      P2002: "Bu kayıt zaten mevcut.",
+      P2000: "Değer çok uzun.",
+      P2001: "Kayıt bulunamadı.",
+
+      // Foreign Key
+      P2003: "İlişkili kayıt bulunamadı.",
+      P2014: "Gerekli ilişki eksik.",
+
+      // Update/Delete
+      P2025: "Kayıt bulunamadı.",
+
+      // Constraint
+      P2004: "Veri kısıtlaması ihlali.",
+
+      // Transaction
+      P2034: "İşlem çakışması. Tekrar deneyin.",
+    };
+    return messages[error.code] || "Veritabanı hatası.";
+  }
+  // Validation hatası
+  if (error instanceof Prisma.PrismaClientValidationError) {
+    return "Geçersiz veri formatı.";
+  }
+
+  // Normal hata
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Bilinmeyen bir hata oluştu.";
+}
+
+export function handleDbActionError(
+  error: unknown,
+  label: string,
+): { success: false; error: string } {
+  console.error(`${label} error:`, error);
+
+  if (error instanceof PrismaClientKnownRequestError) {
+    return { success: false, error: getErrorMessageForDb(error) };
+  }
+
+  if (error instanceof Error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: false, error: "Beklenmeyen bir hata oluştu." };
+}
