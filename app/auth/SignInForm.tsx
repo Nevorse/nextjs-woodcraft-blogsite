@@ -4,7 +4,7 @@ import SubmitButton from "@/components/ui/form/SubmitButton";
 import {
   SignInUpFormSchema,
   SignInUpFormValues,
-} from "../validations/signInUpFormSchema";
+} from "@/lib/validations/signInUpFormSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInAction, signUpAction } from "@/lib/actions/auth-actions";

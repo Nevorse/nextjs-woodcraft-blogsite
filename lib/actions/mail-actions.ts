@@ -1,6 +1,6 @@
 "use server";
 import { send } from "@emailjs/nodejs";
-import { ContactFormValues } from "../../app/validations/contactFormSchema";
+import { ContactFormValues } from "@/lib/validations/contactFormSchema";
 
 const serviceId = process.env.MJS_SERVICE_ID;
 const templateId = process.env.MJS_TEMPLATE_ID;

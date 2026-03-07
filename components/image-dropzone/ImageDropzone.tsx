@@ -1,5 +1,4 @@
 "use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { LuUpload as UploadIcon } from "react-icons/lu";
@@ -9,16 +8,6 @@ import { saveImagesToAlbum } from "@/lib/actions/db/image-actions";
 import { usePathname } from "next/navigation";
 import SubmitButton from "../ui/form/SubmitButton";
 import PreviewItem from "./PreviewItem";
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import DndSortableGrid from "../ui/admin/DndSortableGrid";
 
 type UploadType = "cover" | "services" | "projects";
@@ -228,30 +217,6 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
       URL.revokeObjectURL(fileToRemove.preview);
     }
     setPreviews((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const DndSensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 200,
-        tolerance: 5,
-      },
-    }),
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) return;
-
-    setPreviews((prev) => {
-      const oldIndex = prev.findIndex((i) => i.id === active.id);
-      const newIndex = prev.findIndex((i) => i.id === over.id);
-      return arrayMove(prev, oldIndex, newIndex);
-    });
   };
 
   return (

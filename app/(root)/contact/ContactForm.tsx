@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ContactFormSchema,
   ContactFormValues,
-} from "@/app/validations/contactFormSchema";
+} from "@/lib/validations/contactFormSchema";
 import SubmitButton from "@/components/ui/form/SubmitButton";
 import { sendEmailAction } from "@/lib/actions/mail-actions";
 import Input from "@/components/ui/form/Input";

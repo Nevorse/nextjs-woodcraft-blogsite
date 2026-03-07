@@ -78,41 +78,6 @@ export default function SingleAlbumModal({
         className="absolute right-4 md:right-10 w-10 h-10 text-white/80 cursor-pointer hover:text-white hover:scale-110 transition-all z-50"
       />
 
-      {/* <div className="relative flex items-center justify-center h-[80vh] min-h-50 w-full max-w-5xl mx-auto overflow-hidden">
-        <Image
-          src={data[currentIndex]?.image || Photo1.src}
-          alt={
-            alt
-              ? `${alt} Image ${currentIndex + 1}`
-              : `Project Image ${currentIndex + 1}`
-          }
-          fill
-          priority
-          className="object-contain transition-opacity duration-300"
-          sizes="100vw"
-        />
-        <div className="hidden">
-          {currentIndex < data.length - 1 && (
-            <Image
-              src={data[currentIndex + 1]?.image}
-              priority
-              width={10}
-              height={10}
-              alt=""
-            />
-          )}
-          {currentIndex > 0 && (
-            <Image
-              src={data[currentIndex - 1]?.image}
-              priority
-              width={10}
-              height={10}
-              alt=""
-            />
-          )}
-        </div>
-      </div> */}
-
       <div className="relative group shadow-2xl">
         <Image
           src={data[currentIndex]?.image || Photo1.src}
