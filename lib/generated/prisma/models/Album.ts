@@ -40,6 +40,7 @@ export type AlbumMinAggregateOutputType = {
   slug: string | null
   order: number | null
   type: $Enums.AlbumType | null
+  isPublished: boolean | null
   folderId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -51,6 +52,7 @@ export type AlbumMaxAggregateOutputType = {
   slug: string | null
   order: number | null
   type: $Enums.AlbumType | null
+  isPublished: boolean | null
   folderId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -63,6 +65,7 @@ export type AlbumCountAggregateOutputType = {
   slug: number
   order: number
   type: number
+  isPublished: number
   folderId: number
   createdAt: number
   updatedAt: number
@@ -84,6 +87,7 @@ export type AlbumMinAggregateInputType = {
   slug?: true
   order?: true
   type?: true
+  isPublished?: true
   folderId?: true
   createdAt?: true
   updatedAt?: true
@@ -95,6 +99,7 @@ export type AlbumMaxAggregateInputType = {
   slug?: true
   order?: true
   type?: true
+  isPublished?: true
   folderId?: true
   createdAt?: true
   updatedAt?: true
@@ -107,6 +112,7 @@ export type AlbumCountAggregateInputType = {
   slug?: true
   order?: true
   type?: true
+  isPublished?: true
   folderId?: true
   createdAt?: true
   updatedAt?: true
@@ -206,6 +212,7 @@ export type AlbumGroupByOutputType = {
   slug: string
   order: number
   type: $Enums.AlbumType
+  isPublished: boolean
   folderId: string | null
   createdAt: Date
   updatedAt: Date
@@ -241,6 +248,7 @@ export type AlbumWhereInput = {
   slug?: Prisma.StringFilter<"Album"> | string
   order?: Prisma.IntFilter<"Album"> | number
   type?: Prisma.EnumAlbumTypeFilter<"Album"> | $Enums.AlbumType
+  isPublished?: Prisma.BoolFilter<"Album"> | boolean
   folderId?: Prisma.StringNullableFilter<"Album"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Album"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Album"> | Date | string
@@ -255,6 +263,7 @@ export type AlbumOrderByWithRelationInput = {
   slug?: Prisma.SortOrder
   order?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   folderId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -272,6 +281,7 @@ export type AlbumWhereUniqueInput = Prisma.AtLeast<{
   content?: Prisma.JsonNullableFilter<"Album">
   order?: Prisma.IntFilter<"Album"> | number
   type?: Prisma.EnumAlbumTypeFilter<"Album"> | $Enums.AlbumType
+  isPublished?: Prisma.BoolFilter<"Album"> | boolean
   folderId?: Prisma.StringNullableFilter<"Album"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Album"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Album"> | Date | string
@@ -286,6 +296,7 @@ export type AlbumOrderByWithAggregationInput = {
   slug?: Prisma.SortOrder
   order?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   folderId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -306,6 +317,7 @@ export type AlbumScalarWhereWithAggregatesInput = {
   slug?: Prisma.StringWithAggregatesFilter<"Album"> | string
   order?: Prisma.IntWithAggregatesFilter<"Album"> | number
   type?: Prisma.EnumAlbumTypeWithAggregatesFilter<"Album"> | $Enums.AlbumType
+  isPublished?: Prisma.BoolWithAggregatesFilter<"Album"> | boolean
   folderId?: Prisma.StringNullableWithAggregatesFilter<"Album"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Album"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Album"> | Date | string
@@ -318,6 +330,7 @@ export type AlbumCreateInput = {
   slug: string
   order?: number
   type: $Enums.AlbumType
+  isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   images?: Prisma.ImageCreateNestedManyWithoutAlbumInput
@@ -331,6 +344,7 @@ export type AlbumUncheckedCreateInput = {
   slug: string
   order?: number
   type: $Enums.AlbumType
+  isPublished?: boolean
   folderId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -344,6 +358,7 @@ export type AlbumUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.ImageUpdateManyWithoutAlbumNestedInput
@@ -357,6 +372,7 @@ export type AlbumUncheckedUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -370,6 +386,7 @@ export type AlbumCreateManyInput = {
   slug: string
   order?: number
   type: $Enums.AlbumType
+  isPublished?: boolean
   folderId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -382,6 +399,7 @@ export type AlbumUpdateManyMutationInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -393,6 +411,7 @@ export type AlbumUncheckedUpdateManyInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,6 +434,7 @@ export type AlbumCountOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   order?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   folderId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -430,6 +450,7 @@ export type AlbumMaxOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   order?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   folderId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -441,6 +462,7 @@ export type AlbumMinOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   order?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   folderId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -524,6 +546,7 @@ export type AlbumCreateWithoutFolderInput = {
   slug: string
   order?: number
   type: $Enums.AlbumType
+  isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   images?: Prisma.ImageCreateNestedManyWithoutAlbumInput
@@ -536,6 +559,7 @@ export type AlbumUncheckedCreateWithoutFolderInput = {
   slug: string
   order?: number
   type: $Enums.AlbumType
+  isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   images?: Prisma.ImageUncheckedCreateNestedManyWithoutAlbumInput
@@ -577,6 +601,7 @@ export type AlbumScalarWhereInput = {
   slug?: Prisma.StringFilter<"Album"> | string
   order?: Prisma.IntFilter<"Album"> | number
   type?: Prisma.EnumAlbumTypeFilter<"Album"> | $Enums.AlbumType
+  isPublished?: Prisma.BoolFilter<"Album"> | boolean
   folderId?: Prisma.StringNullableFilter<"Album"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Album"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Album"> | Date | string
@@ -589,6 +614,7 @@ export type AlbumCreateWithoutImagesInput = {
   slug: string
   order?: number
   type: $Enums.AlbumType
+  isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   folder?: Prisma.AlbumFolderCreateNestedOneWithoutAlbumsInput
@@ -601,6 +627,7 @@ export type AlbumUncheckedCreateWithoutImagesInput = {
   slug: string
   order?: number
   type: $Enums.AlbumType
+  isPublished?: boolean
   folderId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -629,6 +656,7 @@ export type AlbumUpdateWithoutImagesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   folder?: Prisma.AlbumFolderUpdateOneWithoutAlbumsNestedInput
@@ -641,6 +669,7 @@ export type AlbumUncheckedUpdateWithoutImagesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -653,6 +682,7 @@ export type AlbumCreateManyFolderInput = {
   slug: string
   order?: number
   type: $Enums.AlbumType
+  isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -664,6 +694,7 @@ export type AlbumUpdateWithoutFolderInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.ImageUpdateManyWithoutAlbumNestedInput
@@ -676,6 +707,7 @@ export type AlbumUncheckedUpdateWithoutFolderInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.ImageUncheckedUpdateManyWithoutAlbumNestedInput
@@ -688,6 +720,7 @@ export type AlbumUncheckedUpdateManyWithoutFolderInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   type?: Prisma.EnumAlbumTypeFieldUpdateOperationsInput | $Enums.AlbumType
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -730,6 +763,7 @@ export type AlbumSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   slug?: boolean
   order?: boolean
   type?: boolean
+  isPublished?: boolean
   folderId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -745,6 +779,7 @@ export type AlbumSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   slug?: boolean
   order?: boolean
   type?: boolean
+  isPublished?: boolean
   folderId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -758,6 +793,7 @@ export type AlbumSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   slug?: boolean
   order?: boolean
   type?: boolean
+  isPublished?: boolean
   folderId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -771,12 +807,13 @@ export type AlbumSelectScalar = {
   slug?: boolean
   order?: boolean
   type?: boolean
+  isPublished?: boolean
   folderId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AlbumOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "content" | "slug" | "order" | "type" | "folderId" | "createdAt" | "updatedAt", ExtArgs["result"]["album"]>
+export type AlbumOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "content" | "slug" | "order" | "type" | "isPublished" | "folderId" | "createdAt" | "updatedAt", ExtArgs["result"]["album"]>
 export type AlbumInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   images?: boolean | Prisma.Album$imagesArgs<ExtArgs>
   folder?: boolean | Prisma.Album$folderArgs<ExtArgs>
@@ -802,6 +839,7 @@ export type $AlbumPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     slug: string
     order: number
     type: $Enums.AlbumType
+    isPublished: boolean
     folderId: string | null
     createdAt: Date
     updatedAt: Date
@@ -1236,6 +1274,7 @@ export interface AlbumFieldRefs {
   readonly slug: Prisma.FieldRef<"Album", 'String'>
   readonly order: Prisma.FieldRef<"Album", 'Int'>
   readonly type: Prisma.FieldRef<"Album", 'AlbumType'>
+  readonly isPublished: Prisma.FieldRef<"Album", 'Boolean'>
   readonly folderId: Prisma.FieldRef<"Album", 'String'>
   readonly createdAt: Prisma.FieldRef<"Album", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Album", 'DateTime'>

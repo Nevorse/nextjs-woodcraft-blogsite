@@ -12,7 +12,9 @@ const privateKey = process.env.MJS_PRIVATE_KEY;
 //   message: string;
 // } & ({ phoneNum: string; mail?: string } | { mail: string; phoneNum?: string });
 
-export const sendEmailAction = async (formParams: ContactFormValues) => {
+export const sendEmailAction = async (
+  formParams: ContactFormValues,
+): Promise<{ status: number; text: string }> => {
   if (!serviceId || !templateId || !publicKey || !privateKey) {
     console.error("Error: The environment variable is not defined!");
     throw new Error("Bir hata oluştu. Env Error");

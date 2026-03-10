@@ -42,9 +42,9 @@ export default function Navbar() {
     const result = await signOutAction();
     if (result.success === true) {
       router.push("/");
-      toast.success(result.message);
+      toast.success("Çıkış yapıldı");
     } else {
-      toast.error(`${(result.message)}`);
+      toast.error(`${(result.error)}`);
     }
   };
 

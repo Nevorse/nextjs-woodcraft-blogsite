@@ -39,20 +39,20 @@ export default function SignInForm({
       const result = await signInAction(data.mail, data.password);
       if (result.success === true) {
         router.push("/admin");
-        toast.success(`${result.data?.user.name} hesabına giriş başarılı`);
+        toast.success(`${result.data.userName} hesabına giriş başarılı`);
         reset();
       } else {
-        toast.error(`${result.message}`);
+        toast.error(`${result.error}`);
       }
     } else if (signMode === "signup" && isRegistrationOpen) {
       const result = await signUpAction(data.mail, data.password, data.name as string);
       console.log(result);
       if (result.success === true) {
         router.push("/admin");
-        toast.success(`${result.data?.user.name} hesabı oluşturma başarılı`);
+        toast.success(`${result.data.userName} hesabı oluşturma başarılı`);
         reset();
       } else {
-        toast.error(`${result.message}`);
+        toast.error(`${result.error}`);
       }
     }
   };

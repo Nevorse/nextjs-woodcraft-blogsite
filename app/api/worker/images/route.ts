@@ -31,25 +31,25 @@ export async function POST(request: Request) {
     }
 
     const formData = await request.formData();
-    const files = formData.getAll("file") as File[];
-    const xType = formData.get("x-type") as string;
-    const albumId = formData.get("album-id") as string;
 
-    if (!files.length) {
-      return NextResponse.json(
-        { success: false, error: "Dosya sağlanmadı" },
-        { status: 400 },
-      );
-    }
+    const xType = formData.get("x-type") as string;
     if (!xType || !ALLOWED_X_TYPES.includes(xType)) {
       return NextResponse.json(
         { success: false, error: "Geçersiz albüm türü" },
         { status: 400 },
       );
     }
+    const albumId = formData.get("album-id") as string;
     if (!albumId) {
       return NextResponse.json(
         { success: false, error: "Geçersiz albüm ID" },
+        { status: 400 },
+      );
+    }
+    const files = formData.getAll("file") as File[];
+    if (!files.length) {
+      return NextResponse.json(
+        { success: false, error: "Dosya sağlanmadı" },
         { status: 400 },
       );
     }
@@ -73,6 +73,7 @@ export async function POST(request: Request) {
         );
       }
     }
+
     const results = await Promise.allSettled(
       files.map(async (file) => {
         const buffer = await file.arrayBuffer();
@@ -112,7 +113,6 @@ export async function POST(request: Request) {
     const hasSuccess = successPaths.length > 0;
     const hasFailures = successPaths.length < filesOut.length;
 
-    // Başarılı işlem varsa {success: true} gönder ve kaydetme işlemi ile devam et.
     return NextResponse.json(
       { success: hasSuccess, files: filesOut, successPaths },
       { status: !hasSuccess ? 400 : hasFailures ? 207 : 200 },

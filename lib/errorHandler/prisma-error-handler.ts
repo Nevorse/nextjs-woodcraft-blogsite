@@ -1,9 +1,9 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { Prisma } from "../generated/prisma/client";
 
 function getErrorMessageForDb(error: unknown): string {
   // Prisma hatası
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    const code: string = (error as Prisma.PrismaClientKnownRequestError).code;
     const messages: Record<string, string> = {
       // Create/Update
       P2002: "Bu kayıt zaten mevcut.",
@@ -23,7 +23,7 @@ function getErrorMessageForDb(error: unknown): string {
       // Transaction
       P2034: "İşlem çakışması. Tekrar deneyin.",
     };
-    return messages[error.code] || "Veritabanı hatası.";
+    return messages[code] || "Veritabanı hatası.";
   }
   // Validation hatası
   if (error instanceof Prisma.PrismaClientValidationError) {
@@ -44,13 +44,5 @@ export function handleDbActionError(
 ): { success: false; error: string } {
   console.error(`${label} error:`, error);
 
-  if (error instanceof PrismaClientKnownRequestError) {
-    return { success: false, error: getErrorMessageForDb(error) };
-  }
-
-  if (error instanceof Error) {
-    return { success: false, error: error.message };
-  }
-
-  return { success: false, error: "Beklenmeyen bir hata oluştu." };
+  return { success: false, error: getErrorMessageForDb(error) };
 }

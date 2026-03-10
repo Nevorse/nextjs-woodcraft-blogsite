@@ -155,6 +155,7 @@ export const AlbumFolderScalarFieldEnum = {
   slug: 'slug',
   order: 'order',
   type: 'type',
+  isPublished: 'isPublished',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -169,6 +170,7 @@ export const AlbumScalarFieldEnum = {
   slug: 'slug',
   order: 'order',
   type: 'type',
+  isPublished: 'isPublished',
   folderId: 'folderId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

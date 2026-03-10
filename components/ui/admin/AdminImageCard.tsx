@@ -110,7 +110,7 @@ export default function AdminImageCard({
       {...attributes}
       {...listeners}
       className={cn(
-        "group relative cursor-pointer w-full aspect-16/11 max-w-125 ",
+        "group relative w-full aspect-16/11 max-w-125 ",
         isDragging ? "opacity-50 scale-95" : "",
       )}
     >
@@ -135,7 +135,7 @@ export default function AdminImageCard({
           buttonName="Resmi Sil"
           pendingButtonName="Resim Siliniyor..."
           type="button"
-          className="bg-orange-700"
+          className="bg-orange-700 hover:opacity-90! cursor-pointer"
           onClick={handleDeleteClick}
         />
       </div>

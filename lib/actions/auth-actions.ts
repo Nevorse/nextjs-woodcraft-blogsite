@@ -15,7 +15,13 @@ const errorMessages: Record<number, string> = {
   500: "Sunucu şu an yanıt veremiyor, lütfen daha sonra tekrar deneyiniz.",
   503: "Servis şu anda kullanılamıyor, bakım yapılıyor olabilir.",
 };
-export const signInAction = async (email: string, password: string) => {
+export const signInAction = async (
+  email: string,
+  password: string,
+): Promise<
+  | { success: true; data: { userName: string } }
+  | { success: false; error: string; status: string | number }
+> => {
   try {
     const result = await auth.api.signInEmail({
       body: {
@@ -25,29 +31,30 @@ export const signInAction = async (email: string, password: string) => {
     });
     return {
       success: true,
-      data: result,
+      data: { userName: result.user.name },
     };
   } catch (error) {
     if (error instanceof APIError) {
       const message = errorMessages[error.statusCode] || error.message;
       return {
         success: false,
-        message: message,
+        error: message,
         status: error.status,
       };
     } else {
       console.error("Beklenmedik Hata:", error);
       return {
         success: false,
-        message:
-          "Sistemde teknik bir arıza oluştu. Lütfen daha sonra tekrar deneyin.",
+        error: "Sistemde teknik bir arıza oluştu. Lütfen daha sonra tekrar deneyin.",
         status: 500,
       };
     }
   }
 };
 
-export const signOutAction = async () => {
+export const signOutAction = async (): Promise<
+  { success: true } | { success: false; error: string; status: string | number }
+> => {
   try {
     await auth.api.signOut({
       headers: await headers(),
@@ -55,21 +62,20 @@ export const signOutAction = async () => {
 
     return {
       success: true,
-      message: "Başarıyla çıkış yapıldı.",
     };
   } catch (error) {
     if (error instanceof APIError) {
       const message = errorMessages[error.statusCode] || error.message;
       return {
         success: false,
-        message: message,
+        error: message,
         status: error.status,
       };
     } else {
       console.error("Beklenmedik Hata:", error);
       return {
         success: false,
-        message: "Çıkış yapılırken bir hata oluştu.",
+        error: "Çıkış yapılırken bir hata oluştu.",
         status: 500,
       };
     }
@@ -80,20 +86,23 @@ export const signUpAction = async (
   email: string,
   password: string,
   name: string,
-) => {
+): Promise<
+  | { success: true; data: { userName: string } }
+  | { success: false; error: string; status: string | number }
+> => {
   try {
     const siteSettings = await getSiteSettings({ isRegistrationOpen: true });
     if (!siteSettings?.isRegistrationOpen) {
       return {
         success: false,
-        message: "Kayıt işlemi şu anda kapalıdır.",
+        error: "Kayıt işlemi şu anda kapalıdır.",
         status: 403,
       };
     }
     if (name.trim() == "" || password.trim() == "" || email.trim() == "") {
       return {
         success: false,
-        message: "Lütfen tüm alanları doldurun.",
+        error: "Lütfen tüm alanları doldurun.",
         status: 400,
       };
     }
@@ -106,21 +115,20 @@ export const signUpAction = async (
     });
     return {
       success: true,
-      data: result,
+      data: { userName: result.user.name },
     };
   } catch (error) {
     if (error instanceof APIError) {
       return {
         success: false,
-        message: error.message,
+        error: error.message,
         status: error.status,
       };
     } else {
       console.error("Beklenmedik Hata:", error);
       return {
         success: false,
-        message:
-          "Sistemde teknik bir arıza oluştu. Lütfen daha sonra tekrar deneyin.",
+        error: "Sistemde teknik bir arıza oluştu. Lütfen daha sonra tekrar deneyin.",
         status: 500,
       };
     }

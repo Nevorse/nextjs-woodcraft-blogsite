@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { AlbumFolderGetPayload } from "../generated/prisma/models";
 import { FolderType } from "../generated/prisma/enums";
 
-type AlbumFolderType = AlbumFolderGetPayload<{
+export type AlbumFolderType = AlbumFolderGetPayload<{
   include: {
     folderImage: true;
   };

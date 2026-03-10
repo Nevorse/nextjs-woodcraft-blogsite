@@ -40,12 +40,12 @@ export default function SubmitButton({
       onClick={handleClick}
       disabled={isLoading || props.disabled}
       className={`inline-flex items-center px-5 py-2 mt-1 font-semibold leading-6 text-sm shadow-md 
-                  rounded-md text-(--color-secondary) bg-(--color-tertiary) transition-all 
-                  enabled:hover:opacity-80
+                  rounded-md text-(--color-secondary) bg-(--color-tertiary) transition-all duration-200
+                  enabled:hover:opacity-70
                   disabled:cursor-not-allowed
                   disabled:opacity-50
                   ${className || ""}
-                  ${isLoading ? "cursor-not-allowed! opacity-70!" : ""}`}
+                  ${isLoading && "opacity-100!"}`}
     >
       {isLoading ? (
         <>

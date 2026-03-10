@@ -1,8 +1,8 @@
 "use client";
-import classNames from "classnames";
 import coverDefault from "@/public/images/tv-the-stables-1.jpg";
 import { useEffect, useState } from "react";
 import { getCoverImagePath } from "@/lib/helpers/imageHelpers";
+import { cn } from "@/lib/utils";
 
 type HomeSliderProps = {
   coverImages?: { uuid: string }[];
@@ -43,9 +43,9 @@ export default function HomeSlider({
         <div
           key={imgIndex}
           style={{ backgroundImage: `url(${slideImage})` }}
-          className={classNames(
+          className={cn(
             "w-full h-full bg-center bg-cover absolute opacity-0 transition-all duration-500",
-            { "opacity-100": imgIndex === imageIndex },
+            imgIndex === imageIndex && "opacity-100",
           )}
         >
           <div className="bg-black/35 w-full h-full absolute" />

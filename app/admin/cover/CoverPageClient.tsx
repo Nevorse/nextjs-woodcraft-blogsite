@@ -35,13 +35,17 @@ export default function CoverPageClient({
   const pathname = usePathname();
 
   useEffect(() => {
+    // coverAlbumImages prop'u değiştiğinde state'i direkt set etmek yerine farkı hesaplar:
+    // - Yeni resimler => sıranın başına eklenir
+    // - Silinen resimler => çıkarılır (handleOptimisticDeleteImage zaten anlık kaldırıyor)
+    // - Kaydedilmemiş sıralama bozulmaz
     const prevIds = new Set(prevCoverAlbumImagesRef.current.map((img) => img.id));
     const currentPropIds = new Set(coverAlbumImages.map((img) => img.id));
 
-    const deletedIds = new Set([...prevIds].filter((id) => !currentPropIds.has(id)));
     const newImages = coverAlbumImages.filter((img) => !prevIds.has(img.id));
+    const deletedIds = new Set([...prevIds].filter((id) => !currentPropIds.has(id)));
 
-    if (deletedIds.size > 0 || newImages.length > 0) {
+    if (newImages.length > 0 || deletedIds.size > 0) {
       setCoverImagesState((prev) => [
         ...newImages,
         ...prev.filter((img) => !deletedIds.has(img.id)),

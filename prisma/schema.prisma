@@ -110,6 +110,7 @@ model AlbumFolder {
   slug      String        @unique
   order     Int           @default(0)
   type      FolderType    @default(PROJECT_FOLDER)
+  isPublished Boolean     @default(true)
   
   folderImage Image?      @relation("FolderToImage")
   albums    Album[]
@@ -128,6 +129,8 @@ model Album {
   slug      String        @unique
   order     Int           @default(0)
   type      AlbumType
+  isPublished Boolean     @default(true)
+
 
   images    Image[]       @relation("AlbumToImage")
   folderId  String?

@@ -175,6 +175,7 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
     if (!bucketResult.success) {
       throw new Error(bucketResult.error);
     }
+
     const dbResult = await saveImagesToAlbum(
       bucketResult.successPaths,
       albumId,
@@ -183,6 +184,7 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
     if (!dbResult.success) {
       throw new Error(dbResult.error);
     }
+    
     const failedCount = bucketResult.total - dbResult.count;
     return { successCount: dbResult.count, failedCount };
   };

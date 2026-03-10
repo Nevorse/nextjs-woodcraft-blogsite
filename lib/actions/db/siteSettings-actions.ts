@@ -24,7 +24,7 @@ export type UpdateSiteSettingsParams = {
 export async function updateSiteSettings(
   data: UpdateSiteSettingsParams,
   pathToRevalidate?: string,
-) {
+): Promise<{ success: true; } | { success: false; error: string }> {
   try {
     const cleanData = Object.fromEntries(
       Object.entries(data).filter(([_, value]) => value !== undefined && value !== null),
@@ -36,7 +36,7 @@ export async function updateSiteSettings(
       return { success: false, error: "Veri formatı hatalı" };
     }
 
-    const result = await prisma.siteSettings.upsert({
+    await prisma.siteSettings.upsert({
       where: { id: "SITE_SETTINGS_ID" },
       update: {
         ...cleanData,
@@ -50,7 +50,7 @@ export async function updateSiteSettings(
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
-    return { success: true, result };
+    return { success: true };
   } catch (error) {
     return handleDbActionError(error, "updateSiteSettings");
   }
