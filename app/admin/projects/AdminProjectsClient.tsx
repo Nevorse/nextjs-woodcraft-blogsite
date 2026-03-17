@@ -98,7 +98,7 @@ export default function AdminProjectsClient({
               itemId={folder.id}
               itemHref={`/projects/${folder.slug}`}
               itemTitle={folder.title}
-              imageHref={folder.folderImage?.uuid || Photo1.src}
+              imageHref={folder.folderImage?.uuid}
             />
           ))}
         </div>

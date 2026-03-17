@@ -1,7 +1,15 @@
 import CardComponent from "@/components/ui/cards/CardComponent";
-import { sortedProjectsData } from "@/lib/database/dummyDbData";
+import { getFoldersByType } from "@/lib/database/albumFolder";
+import { FolderType } from "@/lib/generated/prisma/enums";
+import { getImagePath } from "@/lib/helpers/imageHelpers";
 
-export default function HomeProjects() {
+export default async function HomeProjects() {
+  const foldersData = await getFoldersByType(FolderType.PROJECT_FOLDER);
+
+  if (!foldersData) return;
+
+  console.log(foldersData)
+
   return (
     <div className="flex flex-col items-center justify-center w-full mt-40 mb-20">
       <div className="flex flex-col items-center">
@@ -12,12 +20,12 @@ export default function HomeProjects() {
       </div>
 
       <div className="flex w-[92.5%] gap-x-4 gap-y-20 justify-center flex-wrap">
-        {sortedProjectsData?.slice(0, 6).map((project, index) => (
+        {foldersData.slice(0, 6).map((project, index) => (
           <CardComponent
             key={index}
-            title={project.folderTitle}
-            href={`projects/${project.folderTitle}`}
-            imagePath={project.folderImage}
+            title={project.title}
+            href={`projects/${project.slug}`}
+            imagePath={project.folderImage?.uuid}
           />
         ))}
       </div>

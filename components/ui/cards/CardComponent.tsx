@@ -9,7 +9,7 @@ export default function CardComponent({
 }: {
   title: string;
   href: string;
-  imagePath: string | undefined;
+  imagePath: string | undefined | null;
 }) {
   return (
     <div className="flex flex-col gap-3 2xl:w-[450px] w-[350px]">

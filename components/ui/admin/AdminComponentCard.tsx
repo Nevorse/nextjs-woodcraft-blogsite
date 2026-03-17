@@ -13,7 +13,7 @@ type AdminComponentCardProps = {
   itemId: string;
   itemHref: string;
   itemTitle: string;
-  imageHref: string;
+  imageHref: string | undefined | null;
 };
 
 function AdminComponentCard({

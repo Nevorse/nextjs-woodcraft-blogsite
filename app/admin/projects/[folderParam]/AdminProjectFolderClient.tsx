@@ -90,9 +90,9 @@ export default function AdminProjectFolderClient({
             <AdminComponentCard
               key={album.id}
               itemId={album.id}
-              imageHref={album.images[0]?.uuid || Photo1.src}
-              itemTitle={album.title}
               itemHref={`/projects/${albumFolder.slug}/${album.slug}`}
+              itemTitle={album.title}
+              imageHref={album.images[0]?.uuid}
             />
           ))}
         </div>

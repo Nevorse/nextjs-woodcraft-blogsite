@@ -1,7 +1,6 @@
 import CardComponent from "@/components/ui/cards/CardComponent";
 import { getFoldersByType } from "@/lib/database/albumFolder";
 import { FolderType } from "@/lib/generated/prisma/enums";
-import Photo1 from "@/public/images/Photo1.webp";
 import { notFound } from "next/navigation";
 
 export default async function ProjectsPage() {
