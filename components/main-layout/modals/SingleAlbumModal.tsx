@@ -6,6 +6,7 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import Photo1 from "@/public/images/Photo1.webp";
 import { useEffect, useRef, useState } from "react";
 import { GoDotFill } from "react-icons/go";
+import { getImagePath } from "@/lib/helpers/imageHelpers";
 
 export default function SingleAlbumModal({
   data,
@@ -80,7 +81,7 @@ export default function SingleAlbumModal({
 
       <div className="relative group shadow-2xl">
         <Image
-          src={data[currentIndex].uuid || Photo1.src}
+          src={getImagePath(data[currentIndex]?.uuid)}
           alt={alt || "Project Image"}
           width={0}
           height={0}
@@ -92,7 +93,7 @@ export default function SingleAlbumModal({
         <div className="hidden">
           {currentIndex < data.length - 1 && (
             <Image
-              src={data[currentIndex + 1].uuid}
+              src={getImagePath(data[currentIndex + 1]?.uuid)}
               priority
               width={10}
               height={10}
@@ -101,7 +102,7 @@ export default function SingleAlbumModal({
           )}
           {currentIndex > 0 && (
             <Image
-              src={data[currentIndex - 1].uuid}
+              src={getImagePath(data[currentIndex - 1]?.uuid)}
               priority
               width={10}
               height={10}

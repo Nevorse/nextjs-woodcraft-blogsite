@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-(--theme-primary)">
+    <div className="min-h-svh flex flex-col bg-(--theme-primary)">
       <Navbar />
       <Toaster position="top-right" />
       {children}

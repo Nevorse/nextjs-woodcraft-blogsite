@@ -1,5 +1,4 @@
 import CardComponent from "@/components/ui/cards/CardComponent";
-import Photo1 from "@/public/images/Photo1.webp";
 import { getFolderBySlug } from "@/lib/database/albumFolder";
 import { notFound } from "next/navigation";
 
@@ -32,7 +31,7 @@ export default async function ProjectFolderPage({
               key={index}
               title={project.title}
               href={`/projects/${albumFolder.slug}/${project.slug}`}
-              image={project.images[0]?.uuid || Photo1.src}
+              imagePath={project.images[0]?.uuid}
             />
           ))}
         </div>

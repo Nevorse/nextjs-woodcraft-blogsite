@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { memo } from "react";
+import { getImagePath } from "@/lib/helpers/imageHelpers";
 
 type AdminComponentCardProps = {
   itemId: string;
@@ -60,7 +61,7 @@ function AdminComponentCard({
         <Image
           className="w-full 2xl:h-[380px] h-[300px] object-center object-cover"
           alt={itemTitle}
-          src={imageHref}
+          src={getImagePath(imageHref)}
           width={450}
           height={380}
           draggable={false}

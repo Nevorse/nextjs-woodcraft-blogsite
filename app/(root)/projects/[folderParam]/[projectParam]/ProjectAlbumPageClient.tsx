@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import Photo1 from "@/public/images/Photo1.webp";
 import { FolderWithAlbumsType } from "@/lib/database/albumFolder";
 import SmoothLink from "@/components/ui/general/SmoothLink";
+import { getImagePath } from "@/lib/helpers/imageHelpers";
 
 type ProjectAlbumClientProps = {
   projectData: AlbumWithRelations;
@@ -61,7 +62,7 @@ export default function ProjectAlbumPageClient({
             >
               <Image
                 className="object-cover object-center"
-                src={projectData.images[0]?.uuid || Photo1.src}
+                src={getImagePath(projectData.images[0]?.uuid)}
                 alt={projectData.title}
                 fill={true}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -113,7 +114,7 @@ export default function ProjectAlbumPageClient({
               className="relative cursor-pointer w-full aspect-16/11 max-w-[500px] hover:scale-[1.02] transition-transform"
             >
               <Image
-                src={img.uuid}
+                src={getImagePath(img.uuid)}
                 alt={projectData.title}
                 className="object-cover object-center shadow-lg hover:shadow-2xl transition-shadow"
                 fill={true}

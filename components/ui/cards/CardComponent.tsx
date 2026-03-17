@@ -1,15 +1,15 @@
 import Image from "next/image";
 import SmoothLink from "../general/SmoothLink";
-import Photo1 from "@/public/images/Photo1.webp";
+import { getImagePath } from "@/lib/helpers/imageHelpers";
 
 export default function CardComponent({
   title,
   href,
-  image,
+  imagePath,
 }: {
   title: string;
   href: string;
-  image: string | undefined;
+  imagePath: string | undefined;
 }) {
   return (
     <div className="flex flex-col gap-3 2xl:w-[450px] w-[350px]">
@@ -17,7 +17,7 @@ export default function CardComponent({
         <Image
           className="w-full 2xl:h-[380px] h-[300px] object-center object-cover"
           alt={title}
-          src={image || Photo1.src}
+          src={getImagePath(imagePath)}
           width={450}
           height={380}
         />

@@ -26,7 +26,7 @@ export default async function ProjectsPage() {
               key={index}
               title={project.title}
               href={`/projects/${project.slug}`}
-              image={project.folderImage?.uuid || Photo1.src}
+              imagePath={project.folderImage?.uuid}
             />
           ))}
         </div>

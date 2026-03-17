@@ -61,7 +61,7 @@ export default function SingleServiceAlbum({
             alt={serviceData.serviceTitle}
           />
         )}
-      <div className="max-w-[92%] min-h-[90vh] mx-auto my-12">
+      <div className="w-[92%] min-h-[90vh] mx-auto my-12">
         <div className="flex justify-between">
           <div className="text-[28px] mb-8 font-semibold tracking-wider mr-12 shrink-0">
             <h1>{serviceData.serviceTitle}</h1>

@@ -20,7 +20,7 @@ export default function ServicesPage() {
               key={index}
               title={service.serviceTitle}
               href={`/services/${service.serviceTitle}`}
-              image={service.serviceImages?.[0]}
+              imagePath={service.serviceImages?.[0]}
             />
           ))}
         </div>
