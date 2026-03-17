@@ -29,7 +29,6 @@ export default function AdminProjectsClient({
     const result = await createAlbumFolder({
       type: "project",
       pathToRevalidate: pathname,
-      isPublished: false,
     });
     if (result.success) {
       toast.success("Albüm Klasörü oluşturuldu");

@@ -13,7 +13,7 @@ export default function SingleAlbumModal({
   alt,
   onClose,
 }: {
-  data: { image: string; id?: number }[];
+  data: { uuid: string; id: string, order: number }[];
   startIndex: number;
   onClose: () => void;
   alt?: string;
@@ -80,7 +80,7 @@ export default function SingleAlbumModal({
 
       <div className="relative group shadow-2xl">
         <Image
-          src={data[currentIndex]?.image || Photo1.src}
+          src={data[currentIndex].uuid || Photo1.src}
           alt={alt || "Project Image"}
           width={0}
           height={0}
@@ -92,7 +92,7 @@ export default function SingleAlbumModal({
         <div className="hidden">
           {currentIndex < data.length - 1 && (
             <Image
-              src={data[currentIndex + 1]?.image}
+              src={data[currentIndex + 1].uuid}
               priority
               width={10}
               height={10}
@@ -101,7 +101,7 @@ export default function SingleAlbumModal({
           )}
           {currentIndex > 0 && (
             <Image
-              src={data[currentIndex - 1]?.image}
+              src={data[currentIndex - 1].uuid}
               priority
               width={10}
               height={10}

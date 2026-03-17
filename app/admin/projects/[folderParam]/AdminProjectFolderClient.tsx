@@ -25,7 +25,6 @@ export default function AdminProjectFolderClient({
       folderId: albumFolder.id,
       type: "project",
       pathToRevalidate: pathname,
-      isPublished: false,
     });
     if (result.success) {
       toast.success("Albüm Klasörü oluşturuldu");
