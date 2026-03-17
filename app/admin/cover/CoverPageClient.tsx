@@ -17,6 +17,7 @@ import { updateImageOrders } from "@/lib/actions/db/image-actions";
 import SubmitButton from "@/components/ui/form/SubmitButton";
 import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
+import { restoreItemInOrder } from "@/lib/helpers/imageHelpers";
 
 type CoverPageClientProps = {
   initialCoverImageLimit: number | undefined;
@@ -128,18 +129,12 @@ export default function CoverPageClient({
 
   const handleOptimisticDeleteImage = (deletedImage: ImageCardType) => {
     setCoverImagesState((prev) => prev.filter((item) => item.id !== deletedImage.id));
-
     // Restore function
     return (errorMessage: string) => {
-      setCoverImagesState((prev) => {
-        const newIndex = prev.findIndex((item) => item.order > deletedImage.order);
-        const insertAt = newIndex === -1 ? prev.length : newIndex;
-
-        return [...prev.slice(0, insertAt), deletedImage, ...prev.slice(insertAt)];
-      });
+      setCoverImagesState((prev) => restoreItemInOrder(prev, deletedImage));
       setImageErrors((prev) => ({ ...prev, [deletedImage.id]: errorMessage }));
     };
-  }; //// Helper
+  };
 
   return (
     <>
@@ -148,13 +143,21 @@ export default function CoverPageClient({
         coverTextLimit={{ state: coverTextLimitState, set: setCoverTextLimitState }}
         coverTextValues={{ state: coverTextValues, set: setCoverTextValues }}
       />
-      <SubmitButton
-        buttonName="Kaydet"
-        pendingButtonName="Kaydediliyor..."
-        type="button"
-        className={`mt-10`}
-        onClick={handleSave}
-      />
+      <div className="flex flex-col justify-center items-center mt-10">
+        <span>
+          Anasayfada gösterilecek{" "}
+          <span className="underline">limitleri, metinleri ve resim sırasını</span>{" "}
+          değiştirdikten sonra kaydediniz.
+        </span>
+
+        <SubmitButton
+          buttonName="Kaydet"
+          pendingButtonName="Kaydediliyor..."
+          type="button"
+          className={`mt-6`}
+          onClick={handleSave}
+        />
+      </div>
 
       <DndSortableGrid
         itemState={coverImagesState}

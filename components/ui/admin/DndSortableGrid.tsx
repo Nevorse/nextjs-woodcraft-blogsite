@@ -12,7 +12,7 @@ import {
   // DragOverlay,
 } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 type ItemType = {
   id: string;

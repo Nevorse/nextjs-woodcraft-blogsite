@@ -1,13 +1,19 @@
 "use client";
-import SingleAlbumModal from "@/components/main-layout/modals/SingleAlbumModal";
 import { AlbumWithRelations } from "@/lib/database/album";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import Photo1 from "@/public/images/Photo1.webp";
 import { FolderWithAlbumsType } from "@/lib/database/albumFolder";
 import SmoothLink from "@/components/ui/general/SmoothLink";
 import ImageDropzone from "@/components/image-dropzone/ImageDropzone";
-import { getImagePath } from "@/lib/helpers/imageHelpers";
+import { getImagePath, restoreItemInOrder } from "@/lib/helpers/imageHelpers";
+import DndSortableGrid from "@/components/ui/admin/DndSortableGrid";
+import AdminImageCard, { ImageCardType } from "@/components/ui/admin/AdminImageCard";
+import SubmitButton from "@/components/ui/form/SubmitButton";
+import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
+import toast from "react-hot-toast";
+import { updateImageOrders } from "@/lib/actions/db/image-actions";
+import { usePathname } from "next/navigation";
+import { getErrorMessage } from "@/lib/helpers/error-helpers";
 
 type ProjectAlbumClientProps = {
   projectData: AlbumWithRelations;
@@ -19,7 +25,10 @@ export default function AdminProjectAlbumClient({
   folderData,
   projectParam,
 }: ProjectAlbumClientProps) {
+  const [albumImagesState, setAlbumImagesState] = useState(projectData.images || []);
+  const [imageErrors, setImageErrors] = useState<Record<string, string>>({});
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     // scroll to active element
@@ -42,6 +51,42 @@ export default function AdminProjectAlbumClient({
     }
   }, [projectParam]);
 
+  const processSave = async () => {
+    const result = await updateImageOrders({
+      images: albumImagesState,
+      pathToRevalidate: pathname,
+    });
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    return result;
+  };
+  const handleSave = async () => {
+    const orderChanged = hasOrderChanged(albumImagesState, projectData.images);
+    if (!orderChanged) {
+      toast.error("Değişiklik yapılmadı");
+      return;
+    }
+    try {
+      const promise = processSave();
+      await toast.promise(promise, {
+        loading: "Değişiklikler kaydediliyor...",
+        success: "Kaydedildi.",
+        error: (err) => `Bir hata oluştu: ${err.message}`,
+      });
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      console.error(error, errorMessage);
+    }
+  };
+  const handleOptimisticDeleteImage = (deletedImage: ImageCardType) => {
+    setAlbumImagesState((prev) => prev.filter((item) => item.id !== deletedImage.id));
+    // Restore function
+    return (errorMessage: string) => {
+      setAlbumImagesState((prev) => restoreItemInOrder(prev, deletedImage));
+      setImageErrors((prev) => ({ ...prev, [deletedImage.id]: errorMessage }));
+    };
+  };
   return (
     <>
       <div className="flex flex-col lg:flex-row gap-y-8 gap-x-6">
@@ -50,7 +95,7 @@ export default function AdminProjectAlbumClient({
             <div className="relative 2xl:h-[75vh] xl:h-[60vh] lg:h-[65vh] md:h-[55vh] sm:h-[45vh] h-[40vh] w-full transition-all shadow-md">
               <Image
                 className="object-cover object-center"
-                src={getImagePath(projectData.images[0]?.uuid)}
+                src={getImagePath(albumImagesState[0]?.uuid)}
                 alt={projectData.title}
                 fill={true}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -95,24 +140,38 @@ export default function AdminProjectAlbumClient({
 
       <ImageDropzone xType="projects" parentId={projectData.id} />
 
-      {projectData.images && projectData.images.length > 1 && (
-        <div className="flex flex-wrap justify-center mt-10 gap-3">
-          {projectData.images.slice(1).map((img, index) => (
-            <div
-              key={index}
-              className="relative w-full aspect-16/11 max-w-[500px] hover:scale-[1.02] transition-transform"
-            >
-              <Image
-                src={getImagePath(img.uuid)}
-                alt={projectData.title}
-                className="object-cover object-center shadow-lg hover:shadow-2xl transition-shadow"
-                fill={true}
-                sizes="(max-width: 500px) 100vw, 500px"
-              />
-            </div>
+      <div className="flex flex-col justify-center items-center mt-10">
+        <span>
+          <span className="underline">Resim sırasını</span> değiştirdikten sonra
+          kaydediniz.
+        </span>
+
+        <SubmitButton
+          buttonName="Kaydet"
+          pendingButtonName="Kaydediliyor..."
+          type="button"
+          className={`mt-6`}
+          onClick={handleSave}
+        />
+      </div>
+
+      <DndSortableGrid
+        itemState={albumImagesState}
+        setItemState={setAlbumImagesState}
+        initialItems={projectData.images}
+      >
+        <div className="flex flex-wrap justify-center mt-12 gap-3">
+          {albumImagesState.map((itemData, index) => (
+            <AdminImageCard
+              key={`${itemData.id}`}
+              itemData={itemData}
+              onDelete={handleOptimisticDeleteImage}
+              errorMessage={imageErrors[itemData.id]}
+              isPrimaryImage={index === 0}
+            />
           ))}
         </div>
-      )}
+      </DndSortableGrid>
     </>
   );
 }

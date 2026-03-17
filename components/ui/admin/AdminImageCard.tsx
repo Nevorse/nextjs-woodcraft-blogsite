@@ -20,12 +20,14 @@ type AdminImageCardProps = {
   itemData: ImageCardType;
   onDelete?: (deletedImage: ImageCardType) => (errorMessage: string) => void;
   errorMessage?: string | undefined;
+  isPrimaryImage?: boolean;
 };
 
 export default function AdminImageCard({
   itemData,
   onDelete,
   errorMessage,
+  isPrimaryImage = false,
 }: AdminImageCardProps) {
   const pathname = usePathname();
 
@@ -110,7 +112,7 @@ export default function AdminImageCard({
       {...attributes}
       {...listeners}
       className={cn(
-        "group relative w-full aspect-16/11 max-w-125 ",
+        "group relative w-full aspect-16/11 max-w-125 overflow-hidden",
         isDragging ? "opacity-50 scale-95" : "",
       )}
     >
@@ -123,13 +125,26 @@ export default function AdminImageCard({
         draggable={false}
       />
       {/* Status overlay */}
-      {errorMessage && (
-        <div className=" absolute inset-0 bg-red-500/40 flex items-center justify-center">
+      {errorMessage ? (
+        <div className="absolute inset-0 bg-red-500/40 flex items-center justify-center">
           <span className="text-white font-medium overflow-hidden">
             {errorMessage || "Hata oluştu"}
           </span>
         </div>
+      ) : (
+        isPrimaryImage && (
+          <div className="absolute inset-0 bg-gray-500/20 flex items-center justify-center">
+            <span className="text-white text-xl overflow-hidden">
+              {"Albümün Kapak Resmi"}
+            </span>
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute w-[140%] rotate-35 h-0.5 bg-gray-500/50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+              <div className="absolute w-[140%] -rotate-35 h-0.5 bg-gray-500/50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            </div>
+          </div>
+        )
       )}
+
       <div className="flex flex-col absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <SubmitButton
           buttonName="Resmi Sil"

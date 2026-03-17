@@ -2,7 +2,6 @@
 import AdminComponentCard from "@/components/ui/admin/AdminComponentCard";
 import DndSortableGrid from "@/components/ui/admin/DndSortableGrid";
 import SubmitButton from "@/components/ui/form/SubmitButton";
-import Photo1 from "@/public/images/Photo1.webp";
 import { FolderWithAlbumsType } from "@/lib/database/albumFolder";
 import { usePathname } from "next/navigation";
 import { useState } from "react";

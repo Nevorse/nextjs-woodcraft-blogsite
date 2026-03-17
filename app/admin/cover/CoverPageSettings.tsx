@@ -65,12 +65,6 @@ export default function CoverPageSettings({
           />
         ))}
       </div>
-
-        <span>
-          Anasayfada gösterilecek{" "}
-          <span className="underline">limitleri, metinleri ve resim sırasını</span>{" "}
-          değiştirdikten sonra kaydediniz.
-        </span>
     </div>
   );
 }

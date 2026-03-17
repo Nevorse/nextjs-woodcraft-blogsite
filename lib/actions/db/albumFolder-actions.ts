@@ -40,7 +40,7 @@ export async function createAlbumFolder({
 
       const existingFolders: { title: string }[] = await prisma.albumFolder.findMany({
         where: {
-          type: validFolderType,
+          // type: validFolderType,
           title: { startsWith: baseTitle },
         },
         select: { title: true },

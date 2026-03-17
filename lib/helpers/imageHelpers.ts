@@ -11,3 +11,14 @@ export function getCoverImagePath(path: string | null | undefined): string {
   if (!path || !baseUrl) return coverDefault.src;
   return `${baseUrl}/${path}`;
 }
+
+export function restoreItemInOrder<T extends { order: number }>(
+  prev: T[],
+  deletedItem: T,
+) {
+  const newIndex = prev.findIndex((item) => item.order < deletedItem.order);
+  const insertAt = newIndex === -1 ? prev.length : newIndex;
+  console.log(insertAt);
+
+  return [...prev.slice(0, insertAt), deletedItem, ...prev.slice(insertAt)];
+}
