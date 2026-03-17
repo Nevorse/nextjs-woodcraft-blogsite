@@ -1,8 +1,6 @@
 import HomeSlider from "@/app/(root)/(HomePage)/HomeSlider";
 import { getAlbumBySlug } from "@/lib/database/album";
 import { getSiteSettings } from "@/lib/database/siteSettings";
-// import CoverPageSettings from "./CoverPageSettings";
-// import AdminImageCard from "@/components/ui/admin/AdminImageCard";
 import ImageDropzone from "@/components/image-dropzone/ImageDropzone";
 import CoverPageClient from "./CoverPageClient";
 
@@ -33,7 +31,7 @@ export default async function AdminCoverPage() {
 
       <div className="flex flex-col justify-center items-center my-8 gap-3">
         <span>Kapak Fotoğrafı Yükle</span>
-        <ImageDropzone xType="cover" albumId={coverAlbumData?.id} />
+        <ImageDropzone xType="cover" parentId={coverAlbumData?.id} />
       </div>
 
       <CoverPageClient

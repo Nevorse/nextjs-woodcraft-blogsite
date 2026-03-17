@@ -8,7 +8,7 @@ import { BreadcrumbNav } from "@/components/ui/general/BreadcrumbNav";
 import SingleAlbumModal from "@/components/main-layout/modals/SingleAlbumModal";
 import { sortedProjectsData } from "@/lib/database/dummyDbData";
 
-export default function SingleProjectAlbum({
+export default function ProjectAlbumPage({
   params,
 }: {
   params: Promise<{ projectParam: string; folderParam: string }>;

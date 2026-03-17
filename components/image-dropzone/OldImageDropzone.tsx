@@ -209,9 +209,8 @@
 //         prev.map((p) => (p.status === "uploading" ? { ...p, status: "error" } : p)),
 //       );
 
-//       console.error(error);
 //       const errorMessage = error instanceof Error ? error.message : "Bilinmeyen hata";
-//       console.error("Error Message:", errorMessage);
+//       console.error(error, errorMessage);
 //     }
 //   };
 

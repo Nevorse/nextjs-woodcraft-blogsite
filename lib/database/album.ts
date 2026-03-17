@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { AlbumGetPayload } from "../generated/prisma/models";
 
-type AlbumWithRelations = AlbumGetPayload<{
+export type AlbumWithRelations = AlbumGetPayload<{
   include: {
     images: {
       select: {

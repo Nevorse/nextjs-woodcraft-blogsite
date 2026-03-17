@@ -2,7 +2,7 @@ import CardComponent from "@/components/ui/cards/CardComponent";
 import { sortedProjectsData } from "@/lib/database/dummyDbData";
 import { notFound } from "next/navigation";
 
-export default async function ProjectsFolderPage({
+export default async function ProjectFolderPage({
   params,
 }: {
   params: Promise<{ folderParam: string }>;

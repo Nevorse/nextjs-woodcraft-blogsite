@@ -3,14 +3,44 @@ import { handleDbActionError } from "@/lib/errorHandler/prisma-error-handler";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function saveImagesToAlbum(
-  paths: string[],
-  albumId: string,
-  pathToRevalidate?: string,
-): Promise<{ success: true; count: number } | { success: false; error: string }> {
+export async function saveImageToFolder({
+  path,
+  folderId,
+  pathToRevalidate,
+}: {
+  path: string;
+  folderId: string;
+  pathToRevalidate?: string;
+}): Promise<{ success: true; count: 1 } | { success: false; error: string }> {
+  try {
+    if (!path) return { success: false, error: "UUID eksik." };
+    if (!folderId) return { success: false, error: "Folder ID'si eksik." };
+
+    await prisma.image.create({
+      data: { uuid: path, folderId },
+    });
+
+    if (pathToRevalidate) {
+      revalidatePath(pathToRevalidate);
+    }
+    return { success: true, count: 1 };
+  } catch (error) {
+    return handleDbActionError(error, "saveImagesToFolder");
+  }
+}
+
+export async function saveImagesToAlbum({
+  paths,
+  albumId,
+  pathToRevalidate,
+}: {
+  paths: string[];
+  albumId: string;
+  pathToRevalidate?: string;
+}): Promise<{ success: true; count: number } | { success: false; error: string }> {
   try {
     if (!paths || paths.length === 0)
-      return { success: false, error: "UUID listesi boş." };
+      return { success: false, error: "UUID listesi eksik." };
     if (!albumId) return { success: false, error: "Albüm ID'si eksik." };
 
     const aggregate = await prisma.image.aggregate({
@@ -46,10 +76,13 @@ export async function saveImagesToAlbum(
   }
 }
 
-export async function removeImagesFromAlbum(
-  paths: string[],
-  pathToRevalidate?: string,
-): Promise<{ success: true; count: number } | { success: false; error: string }> {
+export async function removeImagesFromAlbum({
+  paths,
+  pathToRevalidate,
+}: {
+  paths: string[];
+  pathToRevalidate?: string;
+}): Promise<{ success: true; count: number } | { success: false; error: string }> {
   try {
     if (!paths || paths.length === 0) {
       return { success: false, error: "UUID listesi boş." };
@@ -75,19 +108,25 @@ export async function removeImagesFromAlbum(
   }
 }
 
-export async function updateImageOrders(
-  images: { id: string; order: number }[],
-  pathToRevalidate?: string,
-): Promise<{ success: true } | { success: false; error: string }> {
+export async function updateImageOrders({
+  images,
+  pathToRevalidate,
+}: {
+  images: { id: string; order: number }[];
+  pathToRevalidate?: string;
+}): Promise<{ success: true } | { success: false; error: string }> {
   try {
     if (!images || images.length === 0)
       return { success: false, error: "Resim listesi boş." };
+    
+    // data "desc" ile alındığı için toReversed() gerekli
+    const newOrders = images.toReversed().map((image, index) => ({ id: image.id, order: index }));
 
     await prisma.$transaction(
-      images.map(({ id, order }) =>
+      newOrders.map(({ id, order }) =>
         prisma.image.update({
           where: { id },
-          data: { order: order },
+          data: { order },
         }),
       ),
     );

@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
+import { getErrorMessage } from "@/lib/helpers/error-helpers";
 
 export type ImageCardType = {
   id: string;
@@ -26,7 +27,6 @@ export default function AdminImageCard({
   onDelete,
   errorMessage,
 }: AdminImageCardProps) {
-  // const [isError, setIsError] = useState("");
   const pathname = usePathname();
 
   const deleteImageFromBucket: () => Promise<
@@ -53,8 +53,6 @@ export default function AdminImageCard({
       return responseData;
     }
 
-    // const filePaths = responseData.files.flatMap((f) => (f.ok ? [f.data.file] : []));
-
     return {
       success: true,
       successPaths: responseData.successPaths,
@@ -67,7 +65,10 @@ export default function AdminImageCard({
     if (!bucketResult.success) {
       throw new Error(bucketResult.error);
     }
-    const dbResult = await removeImagesFromAlbum(bucketResult.successPaths, pathname);
+    const dbResult = await removeImagesFromAlbum({
+      paths: bucketResult.successPaths,
+      pathToRevalidate: pathname,
+    });
     if (!dbResult.success) {
       throw new Error(dbResult.error);
     }
@@ -88,10 +89,9 @@ export default function AdminImageCard({
         error: (err) => `Bir hata oluştu: ${err.message}`,
       });
     } catch (error) {
-      console.error(error);
-      const errorMessage = error instanceof Error ? error.message : "Bilinmeyen Hata";
+      const errorMessage = getErrorMessage(error);
+      console.error(error, errorMessage);
       restore?.(errorMessage);
-      // setIsError(errorMessage);
     }
   };
 

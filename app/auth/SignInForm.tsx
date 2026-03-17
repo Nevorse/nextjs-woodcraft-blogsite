@@ -46,7 +46,6 @@ export default function SignInForm({
       }
     } else if (signMode === "signup" && isRegistrationOpen) {
       const result = await signUpAction(data.mail, data.password, data.name as string);
-      console.log(result);
       if (result.success === true) {
         router.push("/admin");
         toast.success(`${result.data.userName} hesabı oluşturma başarılı`);

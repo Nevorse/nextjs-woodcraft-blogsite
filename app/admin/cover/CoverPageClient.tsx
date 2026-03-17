@@ -4,8 +4,8 @@ import DndSortableGrid from "@/components/ui/admin/DndSortableGrid";
 import CoverPageSettings from "./CoverPageSettings";
 import { CoverTextValues } from "./page";
 import AdminImageCard, { ImageCardType } from "@/components/ui/admin/AdminImageCard";
-import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   updateSiteSettings,
   UpdateSiteSettingsParams,
@@ -14,6 +14,9 @@ import { isEqual } from "lodash";
 import { updateAlbumBySlug } from "@/lib/actions/db/album-actions";
 import toast from "react-hot-toast";
 import { updateImageOrders } from "@/lib/actions/db/image-actions";
+import SubmitButton from "@/components/ui/form/SubmitButton";
+import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
+import { getErrorMessage } from "@/lib/helpers/error-helpers";
 
 type CoverPageClientProps = {
   initialCoverImageLimit: number | undefined;
@@ -28,71 +31,48 @@ export default function CoverPageClient({
   initialCoverTexts = {},
   coverAlbumImages = [],
 }: CoverPageClientProps) {
+  const [coverImageLimitState, setCoverImageLimitState] =
+    useState(initialCoverImageLimit);
+  const [coverTextLimitState, setCoverTextLimitState] = useState(initialCoverTextLimit);
+  const [coverTextValues, setCoverTextValues] =
+    useState<CoverTextValues>(initialCoverTexts);
+
   const [coverImagesState, setCoverImagesState] = useState(coverAlbumImages);
   const [imageErrors, setImageErrors] = useState<Record<string, string>>({});
-  const prevCoverAlbumImagesRef = useRef(coverAlbumImages);
   const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    // coverAlbumImages prop'u değiştiğinde state'i direkt set etmek yerine farkı hesaplar:
-    // - Yeni resimler => sıranın başına eklenir
-    // - Silinen resimler => çıkarılır (handleOptimisticDeleteImage zaten anlık kaldırıyor)
-    // - Kaydedilmemiş sıralama bozulmaz
-    const prevIds = new Set(prevCoverAlbumImagesRef.current.map((img) => img.id));
-    const currentPropIds = new Set(coverAlbumImages.map((img) => img.id));
-
-    const newImages = coverAlbumImages.filter((img) => !prevIds.has(img.id));
-    const deletedIds = new Set([...prevIds].filter((id) => !currentPropIds.has(id)));
-
-    if (newImages.length > 0 || deletedIds.size > 0) {
-      setCoverImagesState((prev) => [
-        ...newImages,
-        ...prev.filter((img) => !deletedIds.has(img.id)),
-      ]);
-    }
-
-    prevCoverAlbumImagesRef.current = coverAlbumImages;
-  }, [coverAlbumImages]);
 
   const normalize = (obj: CoverTextValues) => {
     return Object.fromEntries(
       Object.entries(obj).filter(([_, value]) => value != null && value !== ""),
     );
-  };
+  }; //// Helper
 
   const processSave = async (
     isLimitsChanged: boolean,
     limitDataToUpdate: UpdateSiteSettingsParams,
     isTextsModified: boolean,
     coverTextValues: CoverTextValues,
-    hasOrderChanged: boolean,
+    orderChanged: boolean,
   ) => {
     if (isLimitsChanged) {
-      const result = await updateSiteSettings(limitDataToUpdate, pathname);
+      const result = await updateSiteSettings({ data: limitDataToUpdate });
       if (!result.success) {
         throw new Error(result.error);
       }
     }
 
     if (isTextsModified) {
-      const result = await updateAlbumBySlug(
-        "cover-album",
-        { content: coverTextValues },
-        pathname,
-      );
+      const result = await updateAlbumBySlug({
+        slug: "cover-album",
+        data: { content: coverTextValues },
+      });
       if (!result.success) {
         throw new Error(result.error);
       }
     }
 
-    if (hasOrderChanged) {
-      const result = await updateImageOrders(
-        [...coverImagesState]
-          .reverse()
-          .map((img, index) => ({ id: img.id, order: index })),
-        pathname,
-      );
+    if (orderChanged) {
+      const result = await updateImageOrders({ images: coverImagesState });
       if (!result.success) {
         throw new Error(result.error);
       }
@@ -101,18 +81,14 @@ export default function CoverPageClient({
     return { success: true };
   };
 
-  const handleSave = async (
-    coverImageLimit: number | undefined,
-    coverTextLimit: number | undefined,
-    coverTextValues: CoverTextValues,
-  ) => {
+  const handleSave = async () => {
     // Limits
     const limitDataToUpdate: UpdateSiteSettingsParams = {
-      ...(coverImageLimit !== initialCoverImageLimit && {
-        coverImageLimit: coverImageLimit,
+      ...(coverImageLimitState !== initialCoverImageLimit && {
+        coverImageLimit: coverImageLimitState,
       }),
-      ...(coverTextLimit !== initialCoverTextLimit && {
-        coverTextLimit: coverTextLimit,
+      ...(coverTextLimitState !== initialCoverTextLimit && {
+        coverTextLimit: coverTextLimitState,
       }),
     };
     const isLimitsChanged = Object.values(limitDataToUpdate).some((val) => val !== null);
@@ -122,11 +98,10 @@ export default function CoverPageClient({
       normalize(coverTextValues),
       normalize(initialCoverTexts),
     );
-    const hasOrderChanged = coverImagesState.some(
-      (img, index) => img.id !== coverAlbumImages[index].id,
-    );
 
-    const isAnythingChanged = isLimitsChanged || isTextsModified || hasOrderChanged;
+    const orderChanged = hasOrderChanged(coverImagesState, coverAlbumImages);
+
+    const isAnythingChanged = isLimitsChanged || isTextsModified || orderChanged;
 
     if (!isAnythingChanged) {
       toast.error("Değişiklik yapılmadı");
@@ -138,7 +113,7 @@ export default function CoverPageClient({
         limitDataToUpdate,
         isTextsModified,
         coverTextValues,
-        hasOrderChanged,
+        orderChanged,
       );
       await toast.promise(promise, {
         loading: "Değişiklikler kaydediliyor...",
@@ -146,50 +121,57 @@ export default function CoverPageClient({
         error: (err) => `Bir hata oluştu: ${err.message}`,
       });
     } catch (error) {
-      console.error(error);
-      const errorMessage = error instanceof Error ? error.message : "Bilinmeyen hata";
-      console.error("Error Message:", errorMessage);
+      const errorMessage = getErrorMessage(error);
+      console.error(error, errorMessage);
     }
   };
 
   const handleOptimisticDeleteImage = (deletedImage: ImageCardType) => {
-    setCoverImagesState((prev) => prev.filter((img) => img.id !== deletedImage.id));
+    setCoverImagesState((prev) => prev.filter((item) => item.id !== deletedImage.id));
 
     // Restore function
     return (errorMessage: string) => {
       setCoverImagesState((prev) => {
-        const newIndex = prev.findIndex((img) => img.order < deletedImage.order);
+        const newIndex = prev.findIndex((item) => item.order > deletedImage.order);
         const insertAt = newIndex === -1 ? prev.length : newIndex;
 
         return [...prev.slice(0, insertAt), deletedImage, ...prev.slice(insertAt)];
       });
       setImageErrors((prev) => ({ ...prev, [deletedImage.id]: errorMessage }));
     };
-  };
+  }; //// Helper
 
   return (
     <>
       <CoverPageSettings
-        initialCoverImageLimit={initialCoverImageLimit}
-        initialCoverTextLimit={initialCoverTextLimit}
-        initialCoverTexts={initialCoverTexts}
-        handleSave={handleSave}
+        coverImageLimit={{ state: coverImageLimitState, set: setCoverImageLimitState }}
+        coverTextLimit={{ state: coverTextLimitState, set: setCoverTextLimitState }}
+        coverTextValues={{ state: coverTextValues, set: setCoverTextValues }}
+      />
+      <SubmitButton
+        buttonName="Kaydet"
+        pendingButtonName="Kaydediliyor..."
+        type="button"
+        className={`mt-10`}
+        onClick={handleSave}
       />
 
-      {coverImagesState.length > 0 && (
-        <DndSortableGrid itemState={coverImagesState} setItemState={setCoverImagesState}>
-          <div className="flex flex-wrap justify-center mt-24 gap-3">
-            {coverImagesState.map((itemData) => (
-              <AdminImageCard
-                key={`${itemData.id}`}
-                itemData={itemData}
-                onDelete={handleOptimisticDeleteImage}
-                errorMessage={imageErrors[itemData.id]}
-              />
-            ))}
-          </div>
-        </DndSortableGrid>
-      )}
+      <DndSortableGrid
+        itemState={coverImagesState}
+        setItemState={setCoverImagesState}
+        initialItems={coverAlbumImages}
+      >
+        <div className="flex flex-wrap justify-center mt-12 gap-3">
+          {coverImagesState.map((itemData) => (
+            <AdminImageCard
+              key={`${itemData.id}`}
+              itemData={itemData}
+              onDelete={handleOptimisticDeleteImage}
+              errorMessage={imageErrors[itemData.id]}
+            />
+          ))}
+        </div>
+      </DndSortableGrid>
     </>
   );
 }

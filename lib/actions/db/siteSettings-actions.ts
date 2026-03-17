@@ -21,10 +21,13 @@ export type UpdateSiteSettingsParams = {
   coverTextLimit?: number;
   isRegistrationOpen?: boolean;
 };
-export async function updateSiteSettings(
-  data: UpdateSiteSettingsParams,
-  pathToRevalidate?: string,
-): Promise<{ success: true; } | { success: false; error: string }> {
+export async function updateSiteSettings({
+  data,
+  pathToRevalidate,
+}: {
+  data: UpdateSiteSettingsParams;
+  pathToRevalidate?: string;
+}): Promise<{ success: true } | { success: false; error: string }> {
   try {
     const cleanData = Object.fromEntries(
       Object.entries(data).filter(([_, value]) => value !== undefined && value !== null),

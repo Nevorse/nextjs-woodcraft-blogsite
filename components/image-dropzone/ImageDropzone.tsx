@@ -4,17 +4,22 @@ import { useDropzone } from "react-dropzone";
 import { LuUpload as UploadIcon } from "react-icons/lu";
 import toast from "react-hot-toast";
 import { WorkerResponse } from "@/lib/types/worker";
-import { saveImagesToAlbum } from "@/lib/actions/db/image-actions";
+import { saveImagesToAlbum, saveImageToFolder } from "@/lib/actions/db/image-actions";
 import { usePathname } from "next/navigation";
 import SubmitButton from "../ui/form/SubmitButton";
 import PreviewItem from "./PreviewItem";
 import DndSortableGrid from "../ui/admin/DndSortableGrid";
+import { getErrorMessage } from "@/lib/helpers/error-helpers";
 
 type UploadType = "cover" | "services" | "projects";
 
 type ImageDropzoneProps = {
   xType: UploadType;
-  albumId: string | undefined;
+  parentId: string | undefined;
+  parentFolderId?: string | undefined;
+  isSaveToFolder?: boolean;
+  isMultiple?: boolean;
+  compact?: boolean;
 };
 
 export type FilePreview = {
@@ -27,7 +32,14 @@ export type FilePreview = {
   error?: string;
 };
 
-export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
+export default function ImageDropzone({
+  xType,
+  parentId,
+  parentFolderId,
+  isSaveToFolder = false,
+  isMultiple = true,
+  compact = false,
+}: ImageDropzoneProps) {
   const previewsRef = useRef<FilePreview[]>([]);
   const [previews, setPreviews] = useState<FilePreview[]>([]);
   const pathname = usePathname();
@@ -68,9 +80,13 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
     onDropRejected: () => {
       toast.error("Geçersiz dosya tipi veya boyutu");
     },
-    multiple: true,
+    multiple: isSaveToFolder ? false : isMultiple,
     maxSize: 10 * 1024 * 1024, // 10MB
   });
+
+  if (!parentId) {
+    return "album id bulunamadı";
+  }
 
   // Upload and Save
   const uploadImagesToBucket: () => Promise<
@@ -83,7 +99,7 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
     if (!filesToUpload.length) {
       return { success: false, error: "Yüklenecek dosya yok" };
     }
-    if (!albumId) {
+    if (!parentId) {
       return { success: false, error: "Albüm ID Bulunamadı!" };
     }
     // Create form data
@@ -92,7 +108,11 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
       formData.append("file", p.file);
     });
     formData.append("x-type", xType);
-    formData.append("album-id", albumId);
+    if (parentFolderId) {
+      formData.append("album-id", `${parentFolderId}/${parentId}`);
+    } else {
+      formData.append("album-id", parentId);
+    }
 
     // Set uploading status
     setPreviews((prev) =>
@@ -168,7 +188,7 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
   };
 
   const processUpload = async () => {
-    if (!albumId) {
+    if (!parentId) {
       throw new Error("Albüm ID Bulunamadı!");
     }
     const bucketResult = await uploadImagesToBucket();
@@ -176,15 +196,24 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
       throw new Error(bucketResult.error);
     }
 
-    const dbResult = await saveImagesToAlbum(
-      bucketResult.successPaths,
-      albumId,
-      pathname,
-    );
+    const dbAction = isSaveToFolder
+      ? saveImageToFolder({
+          path: bucketResult.successPaths[0],
+          folderId: parentId,
+          pathToRevalidate: pathname,
+        })
+      : saveImagesToAlbum({
+          paths: bucketResult.successPaths,
+          albumId: parentId,
+          pathToRevalidate: pathname,
+        });
+
+    const dbResult = await dbAction;
+
     if (!dbResult.success) {
       throw new Error(dbResult.error);
     }
-    
+
     const failedCount = bucketResult.total - dbResult.count;
     return { successCount: dbResult.count, failedCount };
   };
@@ -204,9 +233,8 @@ export default function ImageDropzone({ xType, albumId }: ImageDropzoneProps) {
         prev.map((p) => (p.status === "uploading" ? { ...p, status: "error" } : p)),
       );
 
-      console.error(error);
-      const errorMessage = error instanceof Error ? error.message : "Bilinmeyen hata";
-      console.error("Error Message:", errorMessage);
+      const errorMessage = getErrorMessage(error);
+      console.error(error, errorMessage);
     }
   };
 
