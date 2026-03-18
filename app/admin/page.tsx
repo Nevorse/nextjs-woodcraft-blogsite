@@ -5,7 +5,6 @@ import HomeSlider from "../(root)/(HomePage)/HomeSlider";
 import Footer from "@/components/main-layout/footer";
 import { getSiteSettings } from "@/lib/database/siteSettings";
 import { getAlbumBySlug } from "@/lib/database/album";
-import { CoverTextValues } from "./cover/page";
 
 export default async function AdminPage() {
   const siteSettings = await getSiteSettings({
@@ -15,7 +14,7 @@ export default async function AdminPage() {
   const { coverImageLimit = undefined, coverTextLimit = undefined } = siteSettings || {};
 
   const coverAlbumData = await getAlbumBySlug("cover-album");
-  const coverTexts = (coverAlbumData?.content as CoverTextValues) || {};
+  const coverTexts = coverAlbumData?.content || {};
   return (
     <>
       <div className="max-w-[92%] min-h-[90vh] mx-auto text-center color-white">

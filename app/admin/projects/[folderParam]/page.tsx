@@ -1,6 +1,6 @@
 import { getFolderBySlug } from "@/lib/database/albumFolder";
 import { notFound } from "next/navigation";
-import AdminProjectFolderClient from "./AdminProjectFolderClient";
+import AdminAlbumsClient from "../../_components/AdminAlbumsClient";
 
 export default async function AdminProjectFolderPage({
   params,
@@ -20,7 +20,7 @@ export default async function AdminProjectFolderPage({
           {albumFolder.title}
         </h1>
 
-        <AdminProjectFolderClient key={albumFolder.id} albumFolder={albumFolder} />
+        <AdminAlbumsClient albumFolder={albumFolder} pageType="projects" />
       </div>
     </div>
   );

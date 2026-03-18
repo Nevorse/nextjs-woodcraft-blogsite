@@ -2,7 +2,6 @@
 
 import DndSortableGrid from "@/components/ui/admin/DndSortableGrid";
 import CoverPageSettings from "./CoverPageSettings";
-import { CoverTextValues } from "./page";
 import AdminImageCard, { ImageCardType } from "@/components/ui/admin/AdminImageCard";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,11 +17,13 @@ import SubmitButton from "@/components/ui/form/SubmitButton";
 import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 import { restoreItemInOrder } from "@/lib/helpers/imageHelpers";
+import { ContentTextValues } from "@/lib/database/album";
+import { normalize } from "@/lib/utils";
 
 type CoverPageClientProps = {
   initialCoverImageLimit: number | undefined;
   initialCoverTextLimit: number | undefined;
-  initialCoverTexts?: CoverTextValues;
+  initialCoverTexts?: ContentTextValues;
   coverAlbumImages: ImageCardType[] | undefined;
 };
 
@@ -36,23 +37,16 @@ export default function CoverPageClient({
     useState(initialCoverImageLimit);
   const [coverTextLimitState, setCoverTextLimitState] = useState(initialCoverTextLimit);
   const [coverTextValues, setCoverTextValues] =
-    useState<CoverTextValues>(initialCoverTexts);
+    useState<ContentTextValues>(initialCoverTexts);
 
   const [coverImagesState, setCoverImagesState] = useState(coverAlbumImages);
   const [imageErrors, setImageErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
-  const normalize = (obj: CoverTextValues) => {
-    return Object.fromEntries(
-      Object.entries(obj).filter(([_, value]) => value != null && value !== ""),
-    );
-  }; //// Helper
-
   const processSave = async (
     isLimitsChanged: boolean,
     limitDataToUpdate: UpdateSiteSettingsParams,
     isTextsModified: boolean,
-    coverTextValues: CoverTextValues,
     orderChanged: boolean,
   ) => {
     if (isLimitsChanged) {
@@ -78,7 +72,6 @@ export default function CoverPageClient({
         throw new Error(result.error);
       }
     }
-    router.refresh();
     return { success: true };
   };
 
@@ -113,7 +106,6 @@ export default function CoverPageClient({
         isLimitsChanged,
         limitDataToUpdate,
         isTextsModified,
-        coverTextValues,
         orderChanged,
       );
       await toast.promise(promise, {
@@ -121,6 +113,8 @@ export default function CoverPageClient({
         success: "Kaydedildi.",
         error: (err) => `Bir hata oluştu: ${err.message}`,
       });
+
+      router.refresh();
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error(error, errorMessage);

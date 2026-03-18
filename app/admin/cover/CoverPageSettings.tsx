@@ -1,8 +1,7 @@
 "use client";
 import AdminSelector from "@/components/ui/admin/AdminSelector";
 import Input from "@/components/ui/form/Input";
-import SubmitButton from "@/components/ui/form/SubmitButton";
-import { CoverTextValues } from "./page";
+import { ContentTextValues } from "@/lib/database/album";
 
 type CoverPageSettingsProps = {
   coverImageLimit: {
@@ -14,8 +13,8 @@ type CoverPageSettingsProps = {
     set: React.Dispatch<React.SetStateAction<number | undefined>>;
   };
   coverTextValues: {
-    state: CoverTextValues;
-    set: React.Dispatch<React.SetStateAction<CoverTextValues>>;
+    state: ContentTextValues;
+    set: React.Dispatch<React.SetStateAction<ContentTextValues>>;
   };
 };
 export default function CoverPageSettings({
@@ -56,7 +55,7 @@ export default function CoverPageSettings({
           <Input
             key={`cover-text-input-${index}`}
             value={
-              coverTextValues.state[`content-${index}` as keyof CoverTextValues] || ""
+              coverTextValues.state[`content-${index}` as keyof ContentTextValues] || ""
             }
             onChange={(e) => handleInputChange(index, e.target.value)}
             name={`content-${index}`}

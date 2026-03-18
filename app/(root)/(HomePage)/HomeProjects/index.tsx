@@ -8,8 +8,6 @@ export default async function HomeProjects() {
 
   if (!foldersData) return;
 
-  console.log(foldersData)
-
   return (
     <div className="flex flex-col items-center justify-center w-full mt-40 mb-20">
       <div className="flex flex-col items-center">

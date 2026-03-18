@@ -10,19 +10,21 @@ import toast from "react-hot-toast";
 import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 
-type ProjectFolderClientProps = {
+type AdminAlbumsClientProps = {
   albumFolder: FolderWithAlbumsType;
+  pageType: "projects" | "services";
 };
-export default function AdminProjectFolderClient({
+export default function AdminAlbumsClient({
   albumFolder,
-}: ProjectFolderClientProps) {
+  pageType,
+}: AdminAlbumsClientProps) {
   const [albumsDataState, setAlbumsDataState] = useState(albumFolder.albums ?? []);
   const pathname = usePathname();
 
   const createNewAlbum = async () => {
     const result = await createAlbumForFolder({
       folderId: albumFolder.id,
-      type: "projects", // Ortak alan olacak
+      type: pageType, // Ortak alan
       pathToRevalidate: pathname,
     });
     if (result.success) {
@@ -89,7 +91,7 @@ export default function AdminProjectFolderClient({
             <AdminComponentCard
               key={album.id}
               itemId={album.id}
-              itemHref={`/projects/${albumFolder.slug}/${album.slug}`} // Ortak alan olacak
+              itemHref={`/${pageType}/${albumFolder.slug}/${album.slug}`} // Ortak alan
               itemTitle={album.title}
               imageHref={album.images[0]?.uuid}
             />

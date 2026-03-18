@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { generateIncrementalTitle } from "@/lib/utils";
 import { FolderType } from "@/lib/generated/prisma/enums";
 
-type SimpleFolderType = "project";
+type SimpleFolderType = "projects";
 export async function createAlbumFolder({
   type,
   pathToRevalidate,
@@ -20,16 +20,12 @@ export async function createAlbumFolder({
 }): Promise<{ success: true } | { success: false; error: string }> {
   try {
     const folderTypeMap: Record<SimpleFolderType, FolderType> = {
-      "project": "PROJECT_FOLDER",
+      "projects": "PROJECT_FOLDER",
     };
     const validFolderType = folderTypeMap[type];
     if (!validFolderType) {
       return { success: false, error: `Geçersiz klasör tipi: ${type}` };
     }
-    // const validFolderTypes = Object.values(FolderType);
-    // if (!validFolderTypes.includes(type)) {
-    //   return { success: false, error: `Geçersiz klasör tipi: ${type}` };
-    // }
 
     // Title
     let resolvedTitle;

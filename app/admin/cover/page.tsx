@@ -4,12 +4,6 @@ import { getSiteSettings } from "@/lib/database/siteSettings";
 import ImageDropzone from "@/components/image-dropzone/ImageDropzone";
 import CoverPageClient from "./CoverPageClient";
 
-type ContentKey = `content-${number | string}`;
-
-export type CoverTextValues = {
-  [K in ContentKey]?: string | null;
-};
-
 export default async function AdminCoverPage() {
   const siteSettings = await getSiteSettings({
     coverImageLimit: true,
@@ -18,7 +12,7 @@ export default async function AdminCoverPage() {
   const { coverImageLimit = undefined, coverTextLimit = undefined } = siteSettings || {};
 
   const coverAlbumData = await getAlbumBySlug("cover-album");
-  const coverTexts = (coverAlbumData?.content as CoverTextValues) || {};
+  const coverTexts = coverAlbumData?.content || {};
 
   return (
     <div className="w-[92%] min-h-[90vh] mx-auto text-center color-white mb-40">

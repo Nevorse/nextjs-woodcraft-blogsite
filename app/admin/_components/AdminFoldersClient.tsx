@@ -2,27 +2,33 @@
 import AdminComponentCard from "@/components/ui/admin/AdminComponentCard";
 import DndSortableGrid from "@/components/ui/admin/DndSortableGrid";
 import SubmitButton from "@/components/ui/form/SubmitButton";
-import { FolderWithAlbumsType } from "@/lib/database/albumFolder";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { createAlbumForFolder, updateAlbumOrders } from "@/lib/actions/db/album-actions";
-import toast from "react-hot-toast";
+import {
+  createAlbumFolder,
+  updateFolderOrders,
+} from "@/lib/actions/db/albumFolder-actions";
+import { AlbumFolderType } from "@/lib/database/albumFolder";
 import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-type ProjectFolderClientProps = {
-  albumFolder: FolderWithAlbumsType;
+type AdminFoldersClientProps = {
+  foldersData: AlbumFolderType[];
+  pageType: "projects"
 };
-export default function AdminProjectFolderClient({
-  albumFolder,
-}: ProjectFolderClientProps) {
-  const [albumsDataState, setAlbumsDataState] = useState(albumFolder.albums ?? []);
+
+export default function AdminFoldersClient({
+  foldersData = [],
+  pageType,
+}: AdminFoldersClientProps) {
+  const [foldersDataState, setFoldersDataState] = useState(foldersData);
+  // const [folderErrors, setFolderErrors] = useState<Record<string, string>>({});
   const pathname = usePathname();
 
-  const createNewAlbum = async () => {
-    const result = await createAlbumForFolder({
-      folderId: albumFolder.id,
-      type: "projects", // Ortak alan olacak
+  const createNewFolder = async () => {
+    const result = await createAlbumFolder({
+      type: pageType, // Ortak alan
       pathToRevalidate: pathname,
     });
     if (result.success) {
@@ -33,8 +39,8 @@ export default function AdminProjectFolderClient({
   };
 
   const processSave = async () => {
-    const result = await updateAlbumOrders({
-      albums: albumsDataState,
+    const result = await updateFolderOrders({
+      folders: foldersDataState,
       pathToRevalidate: pathname,
     });
     if (!result.success) {
@@ -44,7 +50,8 @@ export default function AdminProjectFolderClient({
   };
 
   const handleSave = async () => {
-    const orderChanged = hasOrderChanged(albumsDataState, albumFolder.albums);
+    const orderChanged = hasOrderChanged(foldersDataState, foldersData);
+
     if (!orderChanged) {
       toast.error("Değişiklik yapılmadı");
       return;
@@ -61,12 +68,13 @@ export default function AdminProjectFolderClient({
       console.error(error, errorMessage);
     }
   };
+
   return (
     <>
       <SubmitButton
-        onClick={createNewAlbum}
+        onClick={createNewFolder}
         className="bg-(--theme-tertiary)!"
-        buttonName="Yeni Albüm Oluştur"
+        buttonName="Yeni Klasör Oluştur"
         pendingButtonName="Oluşturuluyor..."
         type="button"
       />
@@ -80,18 +88,18 @@ export default function AdminProjectFolderClient({
       />
 
       <DndSortableGrid
-        itemState={albumsDataState}
-        setItemState={setAlbumsDataState}
-        initialItems={albumFolder.albums}
+        itemState={foldersDataState}
+        setItemState={setFoldersDataState}
+        initialItems={foldersData}
       >
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-20 my-20">
-          {albumsDataState.map((album) => (
+          {foldersDataState.map((folder) => (
             <AdminComponentCard
-              key={album.id}
-              itemId={album.id}
-              itemHref={`/projects/${albumFolder.slug}/${album.slug}`} // Ortak alan olacak
-              itemTitle={album.title}
-              imageHref={album.images[0]?.uuid}
+              key={folder.id}
+              itemId={folder.id}
+              itemHref={`/${pageType}/${folder.slug}`} // Ortak alan
+              itemTitle={folder.title}
+              imageHref={folder.folderImage?.uuid}
             />
           ))}
         </div>

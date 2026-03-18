@@ -49,11 +49,6 @@
   font-family: "marcellus", serif;
 }
 
-/* Uploadcare uploader customisation */
-:where([uc-modal]) dialog[open]::backdrop {
-  pointer-events: none;
-}
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -173,8 +168,15 @@
   }
 }
 
+/* Uploadcare uploader customisation */
+:where([uc-modal]) dialog[open]::backdrop {
+  pointer-events: none;
+}
 /* Remove Shadcn selector scroll lock */
 html body[data-scroll-locked] {
   overflow: visible !important;
   margin-right: 0px !important;
+}
+::-webkit-resizer {
+  background: linear-gradient(135deg, transparent 50%, var(--theme-tertiary) 50%);
 }

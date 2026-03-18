@@ -1,15 +1,14 @@
 "use client";
 import SingleAlbumModal from "@/components/main-layout/modals/SingleAlbumModal";
-import { AlbumWithRelations } from "@/lib/database/album";
+import { AlbumWithContent } from "@/lib/database/album";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import Photo1 from "@/public/images/Photo1.webp";
 import { FolderWithAlbumsType } from "@/lib/database/albumFolder";
 import SmoothLink from "@/components/ui/general/SmoothLink";
 import { getImagePath } from "@/lib/helpers/imageHelpers";
 
 type ProjectAlbumClientProps = {
-  projectData: AlbumWithRelations;
+  projectData: AlbumWithContent;
   folderData: FolderWithAlbumsType;
   projectParam: string;
 };

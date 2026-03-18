@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { ContentTextValues } from "./database/album";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -23,3 +24,10 @@ export function generateIncrementalTitle(
 
   return `${baseTitle} ${next}`;
 }
+
+export const normalize = (obj: ContentTextValues) => {
+  if (!obj) return {};
+    return Object.fromEntries(
+      Object.entries(obj).filter(([_, value]) => value != null && value !== ""),
+    );
+  };

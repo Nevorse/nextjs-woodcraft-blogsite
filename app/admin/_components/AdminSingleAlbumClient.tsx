@@ -20,18 +20,20 @@ import { cn, normalize } from "@/lib/utils";
 import { isEqual } from "lodash";
 import { AlbumUpdateSafeInput, updateAlbumBySlug } from "@/lib/actions/db/album-actions";
 
-type ProjectAlbumClientProps = {
+type AdminSingleAlbumClientProps = {
   albumData: AlbumWithContent;
   folderData: FolderWithAlbumsType;
   albumParam: string;
   folderParam: string;
+  pageType: "projects" | "services";
 };
-export default function AdminProjectAlbumClient({
+export default function AdminSingleAlbumClient({
   albumData,
   folderData,
   albumParam,
   folderParam,
-}: ProjectAlbumClientProps) {
+  pageType,
+}: AdminSingleAlbumClientProps) {
   const [albumImagesState, setAlbumImagesState] = useState(albumData.images || []);
   const [imageErrors, setImageErrors] = useState<Record<string, string>>({});
   const [titleState, setTitleState] = useState(albumData.title);
@@ -167,10 +169,18 @@ export default function AdminProjectAlbumClient({
         <div className="w-1/3">
           <BreadcrumbNav
             items={[
-              { label: "Tüm Projeler", href: "/projects" }, // Ortak alan olacak
+              {
+                label:
+                  pageType === "projects"
+                    ? "Tüm Projeler"
+                    : pageType === "services"
+                      ? "Tüm Hizmetler"
+                      : "",
+                href: pageType,
+              }, // Ortak alan
               {
                 label: folderData.title,
-                href: `/projects/${folderParam}`, // Ortak alan olacak
+                href: `/${pageType}/${folderParam}`, // Ortak alan
               },
               { label: albumData.title },
             ]}
@@ -221,7 +231,7 @@ export default function AdminProjectAlbumClient({
             {folderData.albums?.map((data, index) => (
               <SmoothLink
                 key={index + "-" + data.id}
-                href={`/projects/${folderData.slug}/${data.slug}`} // Ortak alan olacak
+                href={`/${pageType}/${folderData.slug}/${data.slug}`} // Ortak alan
                 id={`album-${data.id}`}
               >
                 <div
@@ -240,8 +250,8 @@ export default function AdminProjectAlbumClient({
       </div>
 
       <div className="my-12">
-        {/* Ortak alan olacak */}
-        <ImageDropzone xType="projects" parentId={albumData.id} /> 
+        {/* Ortak alan */}
+        <ImageDropzone xType={pageType} parentId={albumData.id} />
       </div>
       <div className="flex flex-col justify-center items-center">
         <span>

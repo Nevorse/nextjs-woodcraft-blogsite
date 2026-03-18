@@ -16,7 +16,7 @@ const AlbumSchema = z
     content: z.record(ContentKeySchema, z.string().nullable().optional()).optional(),
   })
   .strict();
-type AlbumUpdateSafeInput = Pick<AlbumUpdateInput, "content" | "title" | "order">;
+export type AlbumUpdateSafeInput = Pick<AlbumUpdateInput, "content" | "title" | "order">;
 export async function updateAlbumBySlug({
   slug,
   data,
@@ -25,7 +25,7 @@ export async function updateAlbumBySlug({
   slug: string;
   data: AlbumUpdateSafeInput;
   pathToRevalidate?: string;
-}) {
+}): Promise<{ success: true; newSlug: string } | { success: false; error: string }> {
   try {
     const cleanData = Object.fromEntries(
       Object.entries(data).filter(([_, value]) => value != null && value !== ""),
@@ -58,15 +58,13 @@ export async function updateAlbumBySlug({
     return {
       success: true,
       newSlug: result.slug,
-      title: result.title,
-      content: result.content,
     };
   } catch (error) {
     return handleDbActionError(error, "updateAlbumBySlug");
   }
 }
 
-type SimpleAlbumType = "cover" | "project" | "service";
+type SimpleAlbumType = "cover" | "projects" | "services";
 export async function createAlbumForFolder({
   folderId,
   type,
@@ -83,8 +81,8 @@ export async function createAlbumForFolder({
   try {
     const albumTypeMap: Record<SimpleAlbumType, AlbumType> = {
       cover: "COVER_ALBUM",
-      project: "PROJECT_ALBUM",
-      service: "SERVICE_ALBUM",
+      projects: "PROJECT_ALBUM",
+      services: "SERVICE_ALBUM",
     };
     const validAlbumType = albumTypeMap[type];
     if (!validAlbumType) {

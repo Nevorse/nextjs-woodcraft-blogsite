@@ -9,7 +9,6 @@ import {
 import { AlbumFolderType } from "@/lib/database/albumFolder";
 import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
-import Photo1 from "@/public/images/Photo1.webp";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -27,7 +26,7 @@ export default function AdminProjectsClient({
 
   const createNewFolder = async () => {
     const result = await createAlbumFolder({
-      type: "project",
+      type: "projects", // Ortak alan olacak
       pathToRevalidate: pathname,
     });
     if (result.success) {
@@ -96,7 +95,7 @@ export default function AdminProjectsClient({
             <AdminComponentCard
               key={folder.id}
               itemId={folder.id}
-              itemHref={`/projects/${folder.slug}`}
+              itemHref={`/projects/${folder.slug}`} // Ortak alan olacak
               itemTitle={folder.title}
               imageHref={folder.folderImage?.uuid}
             />

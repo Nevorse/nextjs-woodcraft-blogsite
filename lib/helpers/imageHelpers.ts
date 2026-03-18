@@ -18,7 +18,6 @@ export function restoreItemInOrder<T extends { order: number }>(
 ) {
   const newIndex = prev.findIndex((item) => item.order < deletedItem.order);
   const insertAt = newIndex === -1 ? prev.length : newIndex;
-  console.log(insertAt);
 
   return [...prev.slice(0, insertAt), deletedItem, ...prev.slice(insertAt)];
 }
