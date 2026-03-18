@@ -5,7 +5,7 @@ import Image from "next/image";
 import Photo1 from "@/public/images/Photo1.webp";
 import SmoothLink from "@/components/ui/general/SmoothLink";
 import { BreadcrumbNav } from "@/components/ui/general/BreadcrumbNav";
-import SingleAlbumModal from "@/components/main-layout/modals/SingleAlbumModal";
+// import SingleAlbumModal from "@/components/main-layout/modals/SingleAlbumModal";
 import { sortedServicesData } from "@/lib/database/dummyDbData";
 
 export default function SingleServiceAlbum({
@@ -51,7 +51,7 @@ export default function SingleServiceAlbum({
 
   return (
     <>
-      {serviceImagesArray &&
+      {/* {serviceImagesArray &&
         serviceImagesArray.length > 0 &&
         selectedIndex !== null && (
           <SingleAlbumModal
@@ -60,7 +60,7 @@ export default function SingleServiceAlbum({
             onClose={() => setSelectedIndex(null)}
             alt={serviceData.serviceTitle}
           />
-        )}
+        )} */}
       <div className="w-[92%] min-h-[90vh] mx-auto my-12">
         <div className="flex justify-between">
           <div className="text-[28px] mb-8 font-semibold tracking-wider mr-12 shrink-0">

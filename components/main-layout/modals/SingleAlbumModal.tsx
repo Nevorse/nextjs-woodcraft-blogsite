@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { CgClose } from "react-icons/cg";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import Photo1 from "@/public/images/Photo1.webp";
 import { useEffect, useRef, useState } from "react";
 import { GoDotFill } from "react-icons/go";
 import { getImagePath } from "@/lib/helpers/imageHelpers";
