@@ -13,11 +13,7 @@ export type FolderWithAlbumsType = AlbumFolderGetPayload<{
     folderImage: true;
     albums: {
       orderBy: { order: "desc" };
-      select: {
-        id: true;
-        title: true;
-        slug: true;
-        order: true;
+      include: {
         images: {
           select: {
             id: true;
@@ -25,8 +21,8 @@ export type FolderWithAlbumsType = AlbumFolderGetPayload<{
             order: true;
           };
           orderBy: { order: "desc" };
-          take: 1;
         };
+        folder: true;
       };
     };
   };
@@ -43,20 +39,16 @@ export async function getFoldersByType(type: FolderType): Promise<AlbumFolderTyp
     },
   });
 }
-export async function getFolderBySlug(slug: string): Promise<FolderWithAlbumsType | null> {
+export async function getFolderBySlug(
+  slug: string,
+): Promise<FolderWithAlbumsType | null> {
   return prisma.albumFolder.findUnique({
-    where: {
-      slug: slug,
-    },
+    where: { slug },
     include: {
       folderImage: true,
       albums: {
         orderBy: { order: "desc" },
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          order: true,
+        include: {
           images: {
             select: {
               id: true,
@@ -66,6 +58,7 @@ export async function getFolderBySlug(slug: string): Promise<FolderWithAlbumsTyp
             orderBy: { order: "desc" },
             take: 1,
           },
+          folder: true,
         },
       },
     },

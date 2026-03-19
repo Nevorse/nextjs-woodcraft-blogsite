@@ -11,7 +11,7 @@ export async function createAlbumFolder({
   type,
   pathToRevalidate,
   title,
-  isPublished = true,
+  isPublished = false,
 }: {
   type: SimpleFolderType;
   pathToRevalidate?: string;
@@ -89,7 +89,7 @@ export async function updateFolderOrders({
       return { success: false, error: "Klasör listesi boş." };
 
     // data "desc" ile alındığı için toReversed() gerekli
-    const newOrders = folders.toReversed().map((folder, index) => ({ id: folder.id, order: index }));
+    const newOrders = folders.toReversed().map((item, index) => ({ id: item.id, order: index }));
 
     await prisma.$transaction(
       newOrders.map(({ id, order }) =>

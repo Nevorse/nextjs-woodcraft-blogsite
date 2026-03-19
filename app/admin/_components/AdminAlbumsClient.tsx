@@ -2,43 +2,77 @@
 import AdminComponentCard from "@/components/ui/admin/AdminComponentCard";
 import DndSortableGrid from "@/components/ui/admin/DndSortableGrid";
 import SubmitButton from "@/components/ui/form/SubmitButton";
-import { FolderWithAlbumsType } from "@/lib/database/albumFolder";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { createAlbumForFolder, updateAlbumOrders } from "@/lib/actions/db/album-actions";
+import {
+  createAlbumForFolder,
+  createStandaloneAlbum,
+  updateAlbumOrders,
+} from "@/lib/actions/db/album-actions";
 import toast from "react-hot-toast";
 import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
+import {
+  createAlbumFolder,
+  updateFolderOrders,
+} from "@/lib/actions/db/albumFolder-actions";
 
-type AdminAlbumsClientProps = {
-  albumFolder: FolderWithAlbumsType;
-  pageType: "projects" | "services";
+type AdminItemData = {
+  id: string;
+  title: string;
+  order: number;
+  slug: string;
+  images?: { uuid: string }[];
+  folderImage?: { uuid: string } | null;
+  [key: string]: unknown;
 };
+type AdminAlbumsClientProps = {
+  pageType: "projects" | "services";
+  itemsData: AdminItemData[];
+} & (
+  | { mode: "folder" | "album"; folderId: undefined }
+  | { mode: "albumInFolder"; folderId: string }
+);
 export default function AdminAlbumsClient({
-  albumFolder,
   pageType,
+  itemsData = [],
+  mode,
+  folderId,
 }: AdminAlbumsClientProps) {
-  const [albumsDataState, setAlbumsDataState] = useState(albumFolder.albums ?? []);
+  const [itemsDataState, setItemsDataState] = useState(itemsData);
   const pathname = usePathname();
 
   const createNewAlbum = async () => {
-    const result = await createAlbumForFolder({
-      folderId: albumFolder.id,
-      type: pageType, // Ortak alan
-      pathToRevalidate: pathname,
-    });
+    const createAlbum =
+      mode === "folder" && pageType === "projects"
+        ? createAlbumFolder({ type: pageType, pathToRevalidate: pathname })
+        : mode === "albumInFolder"
+          ? createAlbumForFolder({ folderId, type: pageType, pathToRevalidate: pathname })
+          : mode === "album"
+            ? createStandaloneAlbum({ type: pageType, pathToRevalidate: pathname })
+            : undefined;
+    if (!createAlbum) {
+      toast.error("Servisler için klasör özelliği açılmadı");
+      return;
+    }
+
+    const result = await createAlbum;
+
     if (result.success) {
-      toast.success("Albüm Klasörü oluşturuldu");
+      toast.success("Albüm oluşturuldu");
     } else {
       toast.error(result.error);
     }
   };
 
   const processSave = async () => {
-    const result = await updateAlbumOrders({
-      albums: albumsDataState,
-      pathToRevalidate: pathname,
-    });
+    const updateOrder =
+      mode === "folder"
+        ? updateFolderOrders({ folders: itemsDataState, pathToRevalidate: pathname })
+        : updateAlbumOrders({ albums: itemsDataState, pathToRevalidate: pathname });
+
+    const result = await updateOrder;
+
     if (!result.success) {
       throw new Error(result.error);
     }
@@ -46,7 +80,7 @@ export default function AdminAlbumsClient({
   };
 
   const handleSave = async () => {
-    const orderChanged = hasOrderChanged(albumsDataState, albumFolder.albums);
+    const orderChanged = hasOrderChanged(itemsDataState, itemsData);
     if (!orderChanged) {
       toast.error("Değişiklik yapılmadı");
       return;
@@ -62,6 +96,13 @@ export default function AdminAlbumsClient({
       const errorMessage = getErrorMessage(error);
       console.error(error, errorMessage);
     }
+  };
+
+  const getImageUuid = (item: AdminItemData, mode: string) => {
+    if (mode === "folder") {
+      return item.folderImage?.uuid;
+    }
+    return item.images?.[0]?.uuid;
   };
   return (
     <>
@@ -82,18 +123,18 @@ export default function AdminAlbumsClient({
       />
 
       <DndSortableGrid
-        itemState={albumsDataState}
-        setItemState={setAlbumsDataState}
-        initialItems={albumFolder.albums}
+        itemState={itemsDataState}
+        setItemState={setItemsDataState}
+        initialItems={itemsData}
       >
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-20 my-20">
-          {albumsDataState.map((album) => (
+          {itemsDataState.map((item) => (
             <AdminComponentCard
-              key={album.id}
-              itemId={album.id}
-              itemHref={`/${pageType}/${albumFolder.slug}/${album.slug}`} // Ortak alan
-              itemTitle={album.title}
-              imageHref={album.images[0]?.uuid}
+              key={item.id}
+              itemId={item.id}
+              itemHref={`${pathname}/${item.slug}`}
+              itemTitle={item.title}
+              imageHref={getImageUuid(item, mode)}
             />
           ))}
         </div>

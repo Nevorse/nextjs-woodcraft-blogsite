@@ -20,7 +20,12 @@ export default async function AdminProjectFolderPage({
           {albumFolder.title}
         </h1>
 
-        <AdminAlbumsClient albumFolder={albumFolder} pageType="projects" />
+        <AdminAlbumsClient
+          pageType="projects"
+          itemsData={albumFolder.albums}
+          mode="albumInFolder"
+          folderId={albumFolder.id}
+        />
       </div>
     </div>
   );

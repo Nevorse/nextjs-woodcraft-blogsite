@@ -3,9 +3,7 @@ import AdminAlbumsClient from "../_components/AdminAlbumsClient";
 import { getAlbumsByType } from "@/lib/database/album";
 import { AlbumType } from "@/lib/generated/prisma/enums";
 
-
 export default async function AdminServicePage() {
-;
   const albumsData = await getAlbumsByType(AlbumType.SERVICE_ALBUM);
 
   if (!albumsData) notFound();
@@ -17,7 +15,12 @@ export default async function AdminServicePage() {
           Servislerimiz
         </h1>
 
-        {/* <AdminAlbumsClient albumFolder={albumsData} pageType="projects" /> */}
+        <AdminAlbumsClient
+          pageType="services"
+          itemsData={albumsData}
+          mode="album"
+          folderId={undefined}
+        />
       </div>
     </div>
   );

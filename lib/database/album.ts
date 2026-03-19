@@ -24,7 +24,9 @@ export type AlbumWithContent = Omit<AlbumWithRelations, "content"> & {
   content: ContentTextValues | null;
 };
 
-export async function getAlbumsByType(type: AlbumType): Promise<AlbumWithRelations[]> {
+export async function getAlbumsByType(
+  type: AlbumType,
+): Promise<AlbumWithRelations[] | null> {
   return prisma.album.findMany({
     where: { type },
     orderBy: { order: "desc" },

@@ -64,13 +64,52 @@ export async function updateAlbumBySlug({
   }
 }
 
+export async function updateAlbumOrders({
+  albums,
+  pathToRevalidate,
+}: {
+  albums: { id: string; order: number }[];
+  pathToRevalidate?: string;
+}): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    if (!albums || albums.length === 0)
+      return { success: false, error: "Klasör listesi boş." };
+
+    // data "desc" ile alındığı için toReversed() gerekli
+    const newOrders = albums
+      .toReversed()
+      .map((item, index) => ({ id: item.id, order: index }));
+
+    await prisma.$transaction(
+      newOrders.map(({ id, order }) =>
+        prisma.album.update({
+          where: { id },
+          data: { order },
+        }),
+      ),
+    );
+
+    if (pathToRevalidate) {
+      revalidatePath(pathToRevalidate);
+    }
+    return { success: true };
+  } catch (error) {
+    return handleDbActionError(error, "updateAlbumOrders");
+  }
+}
+
 type SimpleAlbumType = "cover" | "projects" | "services";
+const albumTypeMap: Record<SimpleAlbumType, AlbumType> = {
+  cover: "COVER_ALBUM",
+  projects: "PROJECT_ALBUM",
+  services: "SERVICE_ALBUM",
+};
 export async function createAlbumForFolder({
   folderId,
   type,
   pathToRevalidate,
   title,
-  isPublished = true,
+  isPublished = false,
 }: {
   folderId: string;
   type: SimpleAlbumType;
@@ -79,11 +118,6 @@ export async function createAlbumForFolder({
   isPublished?: boolean;
 }): Promise<{ success: true } | { success: false; error: string }> {
   try {
-    const albumTypeMap: Record<SimpleAlbumType, AlbumType> = {
-      cover: "COVER_ALBUM",
-      projects: "PROJECT_ALBUM",
-      services: "SERVICE_ALBUM",
-    };
     const validAlbumType = albumTypeMap[type];
     if (!validAlbumType) {
       return { success: false, error: `Geçersiz klasör tipi: ${type}` };
@@ -102,7 +136,7 @@ export async function createAlbumForFolder({
     if (title) {
       resolvedTitle = title;
     } else {
-      const baseTitle = "Yeni Proje Albümü";
+      const baseTitle = `Yeni ${type} albümü`;
 
       const existingAlbums: { title: string }[] = await prisma.album.findMany({
         where: {
@@ -149,36 +183,69 @@ export async function createAlbumForFolder({
   }
 }
 
-export async function updateAlbumOrders({
-  albums,
+export async function createStandaloneAlbum({
+  type,
   pathToRevalidate,
+  title,
+  isPublished,
 }: {
-  albums: { id: string; order: number }[];
+  type: SimpleAlbumType;
   pathToRevalidate?: string;
+  title?: string;
+  isPublished?: boolean;
 }): Promise<{ success: true } | { success: false; error: string }> {
   try {
-    if (!albums || albums.length === 0)
-      return { success: false, error: "Klasör listesi boş." };
+    const validAlbumType = albumTypeMap[type];
+    if (!validAlbumType) {
+      return { success: false, error: `Geçersiz klasör tipi: ${type}` };
+    }
 
-    // data "desc" ile alındığı için toReversed() gerekli
-    const newOrders = albums
-      .toReversed()
-      .map((img, index) => ({ id: img.id, order: index }));
+    // Title
+    let resolvedTitle;
+    if (title) {
+      resolvedTitle = title;
+    } else {
+      const baseTitle = `Yeni ${type} albümü`;
 
-    await prisma.$transaction(
-      newOrders.map(({ id, order }) =>
-        prisma.album.update({
-          where: { id },
-          data: { order },
-        }),
-      ),
-    );
+      const existingAlbums: { title: string }[] = await prisma.album.findMany({
+        where: {
+          type: validAlbumType,
+          title: { startsWith: baseTitle },
+        },
+        select: { title: true },
+      });
+
+      resolvedTitle = generateIncrementalTitle(
+        existingAlbums.map((a) => a.title),
+        baseTitle,
+      );
+    }
+
+    // Order
+    const aggregate = await prisma.album.aggregate({
+      where: { type: validAlbumType },
+      _max: { order: true },
+    });
+    const nextOrder = (aggregate._max.order ?? -1) + 1;
+
+    // Slug
+    const slug = slugify(resolvedTitle, { lower: true, strict: true, trim: true });
+
+    await prisma.album.create({
+      data: {
+        title: resolvedTitle,
+        order: nextOrder,
+        slug: slug,
+        type: validAlbumType,
+        isPublished,
+      },
+    });
 
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
     return { success: true };
   } catch (error) {
-    return handleDbActionError(error, "updateAlbumOrders");
+    return handleDbActionError(error, "createStandaloneAlbum");
   }
 }

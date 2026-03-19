@@ -1,7 +1,7 @@
 import { getFoldersByType } from "@/lib/database/albumFolder";
 import { FolderType } from "@/lib/generated/prisma/enums";
 import { notFound } from "next/navigation";
-import AdminFoldersClient from "../_components/AdminFoldersClient";
+import AdminAlbumsClient from "../_components/AdminAlbumsClient";
 
 export default async function AdminProjectsPage() {
   const foldersData = await getFoldersByType(FolderType.PROJECT_FOLDER);
@@ -15,7 +15,12 @@ export default async function AdminProjectsPage() {
           Projelerimiz
         </h1>
 
-        <AdminFoldersClient foldersData={foldersData} pageType="projects" />
+        <AdminAlbumsClient
+          pageType="projects"
+          itemsData={foldersData}
+          mode="folder"
+          folderId={undefined}
+        />
       </div>
     </div>
   );
