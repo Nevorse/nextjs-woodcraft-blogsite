@@ -15,22 +15,31 @@ import { updateImageOrders } from "@/lib/actions/db/image-actions";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 import Input from "@/components/ui/form/Input";
-import { BreadcrumbNav } from "@/components/ui/general/BreadcrumbNav";
+import { BreadcrumbItem, BreadcrumbNav } from "@/components/ui/general/BreadcrumbNav";
 import { cn, normalize } from "@/lib/utils";
 import { isEqual } from "lodash";
 import { AlbumUpdateSafeInput, updateAlbumBySlug } from "@/lib/actions/db/album-actions";
 
+type SimpleAlbumData = {
+  id: string;
+  title: string;
+  order: number;
+  slug: string;
+  images?: { uuid: string }[];
+  [key: string]: unknown;
+};
+
 type AdminSingleAlbumClientProps = {
   albumData: AlbumWithContent;
-  folderData: FolderWithAlbumsType;
   albumParam: string;
-  folderParam: string;
+  otherAlbums: SimpleAlbumData[];
+  folderParam?: string | undefined;
   pageType: "projects" | "services";
 };
 export default function AdminSingleAlbumClient({
   albumData,
-  folderData,
   albumParam,
+  otherAlbums = [],
   folderParam,
   pageType,
 }: AdminSingleAlbumClientProps) {
@@ -83,7 +92,6 @@ export default function AdminSingleAlbumClient({
     if (orderChanged) {
       const result = await updateImageOrders({
         images: albumImagesState,
-        // pathToRevalidate: pathname,
       });
       if (!result.success) throw new Error(result.error);
     }
@@ -91,7 +99,6 @@ export default function AdminSingleAlbumClient({
       const result = await updateAlbumBySlug({
         slug: albumData.slug,
         data: albumDataToUpdate,
-        // pathToRevalidate: pathname,
       });
       if (!result.success) throw new Error(result.error);
 
@@ -153,6 +160,21 @@ export default function AdminSingleAlbumClient({
       setImageErrors((prev) => ({ ...prev, [deletedImage.id]: errorMessage }));
     };
   };
+
+  const breadcrumbItems: BreadcrumbItem[] = [
+    {
+      label: pageType === "projects" ? "Tüm Projeler" : "Tüm Hizmetler",
+      href: `/${pageType}`,
+    },
+  ];
+  if (albumData.folder?.title && folderParam) {
+    breadcrumbItems.push({
+      label: albumData.folder?.title ?? "Klasör",
+      href: `/${pageType}/${albumData.folder?.slug}`,
+    });
+  }
+  breadcrumbItems.push({ label: albumData.title ?? "Albüm" });
+
   return (
     <>
       <div className="flex justify-between gap-12">
@@ -167,24 +189,7 @@ export default function AdminSingleAlbumClient({
           />
         </div>
         <div className="w-1/3">
-          <BreadcrumbNav
-            items={[
-              {
-                label:
-                  pageType === "projects"
-                    ? "Tüm Projeler"
-                    : pageType === "services"
-                      ? "Tüm Hizmetler"
-                      : "",
-                href: pageType,
-              }, // Ortak alan
-              {
-                label: folderData.title,
-                href: `/${pageType}/${folderParam}`, // Ortak alan
-              },
-              { label: albumData.title },
-            ]}
-          />
+          <BreadcrumbNav items={breadcrumbItems} />
         </div>
       </div>
 
@@ -197,6 +202,7 @@ export default function AdminSingleAlbumClient({
                 src={getImagePath(albumImagesState[0]?.uuid)}
                 alt={albumData.title}
                 fill={true}
+                priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
@@ -228,34 +234,45 @@ export default function AdminSingleAlbumClient({
               2xl:max-h-[75vh] xl:max-h-[60vh] lg:max-h-[65vh] md:max-h-[55vh] sm:max-h-[45vh] max-h-[40vh]
               [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-(--theme-tertiary) [&::-webkit-scrollbar-thumb]:rounded-full"
           >
-            {folderData.albums?.map((data, index) => (
-              <SmoothLink
-                key={index + "-" + data.id}
-                href={`/${pageType}/${folderData.slug}/${data.slug}`} // Ortak alan
-                id={`album-${data.id}`}
-              >
-                <div
-                  className={`px-4 py-3 max-h-12 truncate transition-all bg-neutral-200 text-(--color-primary) ${
-                    data.id == albumData.id
-                      ? "bg-(--theme-quaternary)! text-neutral-200!"
-                      : "hover:bg-(--theme-quaternary) hover:text-(--color-secondary) hover:opacity-90"
-                  }`}
+            {otherAlbums?.map((item) => {
+              const itemHref =
+                folderParam
+                  ? `/${pageType}/${folderParam}/${item.slug}`
+                  : `/${pageType}/${item.slug}`;
+
+              return (
+                <SmoothLink
+                  key={item.id}
+                  href={itemHref} // Ortak alan
+                  id={`album-${item.id}`}
                 >
-                  {data.title}
-                </div>
-              </SmoothLink>
-            ))}
+                  <div
+                    className={`px-4 py-3 max-h-12 truncate transition-all bg-neutral-200 text-(--color-primary) ${
+                      item.id == albumData.id
+                        ? "bg-(--theme-quaternary)! text-neutral-200!"
+                        : "hover:bg-(--theme-quaternary) hover:text-(--color-secondary) hover:opacity-90"
+                    }`}
+                  >
+                    {item.title}
+                  </div>
+                </SmoothLink>
+              );
+            })}
           </div>
         </div>
       </div>
 
       <div className="my-12">
         {/* Ortak alan */}
-        <ImageDropzone xType={pageType} parentId={albumData.id} />
+        <ImageDropzone
+          xType={pageType}
+          parentId={albumData.id}
+          parentFolderId={albumData.folderId ? albumData.folderId : undefined}
+        />
       </div>
       <div className="flex flex-col justify-center items-center">
         <span>
-          <span className="underline">Resim sırasını</span> değiştirdikten sonra
+          <span className="underline">Başlığı, içerik yazısını ve resim sırasını</span> değiştirdikten sonra
           kaydediniz.
         </span>
 

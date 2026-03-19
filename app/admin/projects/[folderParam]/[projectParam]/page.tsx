@@ -17,11 +17,11 @@ export default async function AdminProjectAlbumPage({
     <div className="w-[92%] min-h-[90vh] mx-auto my-12">
 
       <AdminSingleAlbumClient
-        albumData={projectData}
-        folderData={folderData}
-        albumParam={projectParam}
-        folderParam={folderParam}
         pageType="projects"
+        albumData={projectData}
+        albumParam={projectParam}
+        otherAlbums={folderData.albums}
+        folderParam={folderParam}
       />
     </div>
   );
