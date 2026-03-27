@@ -1,7 +1,6 @@
 import CardComponent from "@/components/ui/cards/CardComponent";
 import { getFoldersByType } from "@/lib/database/albumFolder";
 import { FolderType } from "@/lib/generated/prisma/enums";
-import { getImagePath } from "@/lib/helpers/imageHelpers";
 
 export default async function HomeProjects() {
   const foldersData = await getFoldersByType(FolderType.PROJECT_FOLDER);

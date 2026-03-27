@@ -1,5 +1,8 @@
-import { sortedServicesData } from "@/lib/database/dummyDbData";
+import { getAlbumsByType } from "@/lib/database/album";
 import HomeServicesSlider from "./HomeServicesSlider";
+import { AlbumType } from "@/lib/generated/prisma/enums";
+
+const albumsData = await getAlbumsByType(AlbumType.SERVICE_ALBUM);
 
 export default function HomeServices() {
   return (
@@ -10,7 +13,7 @@ export default function HomeServices() {
         </div>
         <div className="w-36 h-px bg-(--color-primary)"></div>
       </div>
-      <HomeServicesSlider slideData={sortedServicesData} />
+      <HomeServicesSlider slideData={albumsData} />
     </div>
   );
 }

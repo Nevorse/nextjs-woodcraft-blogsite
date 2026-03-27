@@ -5,15 +5,22 @@ import "swiper/css";
 import "swiper/css/autoplay";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import Photo1 from "@/public/images/Photo1.webp";
 import Image from "next/image";
 import SmoothLink from "@/components/ui/general/SmoothLink";
-import { dummySerivcesProps } from "@/lib/database/dummyDbData";
+import { getImagePath } from "@/lib/helpers/imageHelpers";
 
+type SimpleAlbumData = {
+  id: string;
+  title: string;
+  order: number;
+  slug: string;
+  images?: { uuid: string }[];
+  [key: string]: unknown;
+};
 export default function HomeServicesSlider({
   slideData,
 }: {
-  slideData: dummySerivcesProps[];
+  slideData: SimpleAlbumData[];
 }) {
   // Not in use
   // Click Events
@@ -53,24 +60,24 @@ export default function HomeServicesSlider({
       }}
       className="w-[92%] mx-auto"
     >
-      {slideData.map((service, index) => (
+      {slideData.map((item, index) => (
         <SwiperSlide key={index} className="group">
           <div className="flex flex-col items-center justify-center m-8">
             <SmoothLink
-              href={`/services/${service?.serviceTitle}`}
+              href={`/services/${item.slug}`}
               className="relative block overflow-hidden w-full h-[240px] lg:h-[320px] mb-4 transition-all hover:shadow-xl cursor-pointer"
             >
               <Image
-                src={service.serviceImages?.[0] || Photo1.src}
-                alt={service.serviceTitle}
+                src={getImagePath(item.images?.[0]?.uuid)}
+                alt={item.title}
                 className="object-center object-cover"
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </SmoothLink>
-            <SmoothLink href={`/services/${service?.serviceTitle}`}>
+            <SmoothLink href={`/services/${item.slug}`}>
               <h5 className="text-xl font-bold mb-3 truncate cursor-pointer">
-                {service?.serviceTitle}
+                {item.title}
               </h5>
             </SmoothLink>
           </div>

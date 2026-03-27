@@ -34,12 +34,7 @@ export default function SingleAlbumClient({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    console.log("aaaaaaaaaa");
-
     if (!albumData?.id || !scrollContainerRef.current) return;
-
-    console.log("bbbbbbbb");
-
     // scroll to active element
     const container = scrollContainerRef.current;
     if (container) {
