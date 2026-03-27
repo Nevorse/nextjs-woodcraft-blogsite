@@ -25,7 +25,7 @@ export default async function AdminCoverPage() {
 
       <div className="flex flex-col justify-center items-center my-8 gap-3">
         <span>Kapak Fotoğrafı Yükle</span>
-        <ImageDropzone xType="cover" parentId={coverAlbumData?.id} />
+        <ImageDropzone xType="cover" parentId={coverAlbumData?.id} isMultiple={false} />
       </div>
 
       <CoverPageClient

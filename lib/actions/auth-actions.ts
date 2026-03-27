@@ -75,7 +75,7 @@ export const signOutAction = async (): Promise<
       console.error("Beklenmedik Hata:", error);
       return {
         success: false,
-        error: "Çıkış yapılırken bir hata oluştu.",
+        error: "Sistemde teknik bir arıza oluştu. Lütfen daha sonra tekrar deneyin.",
         status: 500,
       };
     }

@@ -4,7 +4,7 @@ import { FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 import { IoIosMail } from "react-icons/io";
 import { IoLogoInstagram } from "react-icons/io5";
 import SmoothLink from "../../ui/general/SmoothLink";
-import { useWindowSize } from "../../hooks/useWindowSize";
+import { useWindowSize } from "@/hooks/useWindowSize";
 
 export default function Footer() {
   const { width: windowInnerWidth } = useWindowSize();

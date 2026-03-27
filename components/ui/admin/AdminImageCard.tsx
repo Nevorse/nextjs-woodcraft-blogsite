@@ -133,7 +133,7 @@ export default function AdminImageCard({
         </div>
       ) : (
         isPrimaryImage && (
-          <div className="absolute inset-0 bg-gray-500/20 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gray-500/20 flex items-center justify-center pointer-events-none">
             <span className="text-white text-xl overflow-hidden">
               {"Albümün Kapak Resmi"}
             </span>

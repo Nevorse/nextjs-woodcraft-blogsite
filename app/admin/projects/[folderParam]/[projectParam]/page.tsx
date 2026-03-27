@@ -21,7 +21,6 @@ export default async function AdminProjectAlbumPage({
         albumData={projectData}
         albumParam={projectParam}
         otherAlbums={folderData.albums}
-        folderParam={folderParam}
       />
     </div>
   );

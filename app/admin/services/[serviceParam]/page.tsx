@@ -11,7 +11,7 @@ export default async function AdminServiceAlbumPage({
   const { serviceParam } = await params;
 
   const serviceData = await getAlbumBySlug(serviceParam);
-  const albumsData = await getAlbumsByType(AlbumType.SERVICE_ALBUM);
+  const otherAlbumsData = await getAlbumsByType(AlbumType.SERVICE_ALBUM);
 
   if (!serviceData) notFound();
 
@@ -21,7 +21,7 @@ export default async function AdminServiceAlbumPage({
       pageType="services"
       albumData={serviceData}
       albumParam={serviceParam}
-      otherAlbums={albumsData}
+      otherAlbums={otherAlbumsData}
       />
     </div>
   );

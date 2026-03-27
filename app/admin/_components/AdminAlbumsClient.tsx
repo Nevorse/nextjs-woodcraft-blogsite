@@ -59,7 +59,7 @@ export default function AdminAlbumsClient({
     const result = await createAlbum;
 
     if (result.success) {
-      toast.success("Albüm oluşturuldu");
+      toast.success(`${mode === "folder" ? "Klasör" : "Albüm"} oluşturuldu`);
     } else {
       toast.error(result.error);
     }
@@ -109,7 +109,7 @@ export default function AdminAlbumsClient({
       <SubmitButton
         onClick={createNewAlbum}
         className="bg-(--theme-tertiary)!"
-        buttonName="Yeni Albüm Oluştur"
+        buttonName={`Yeni ${mode === "folder" ? "Klasör" : "Albüm"} Oluştur`}
         pendingButtonName="Oluşturuluyor..."
         type="button"
       />

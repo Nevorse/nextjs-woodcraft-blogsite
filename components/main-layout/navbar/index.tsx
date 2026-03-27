@@ -3,17 +3,17 @@ import { navItems, adminNavItems, navTitle, adminNavTitle } from "./navConsts";
 import Image, { StaticImageData } from "next/image";
 import { useEffect, useRef, useState } from "react";
 import SmoothLink from "../../ui/general/SmoothLink";
-import { useWindowSize } from "@/components/hooks/useWindowSize";
 import { CgClose } from "react-icons/cg";
 import { HiOutlineMenuAlt3 } from "react-icons/hi";
 import { usePathname, useRouter } from "next/navigation";
 import { signOutAction } from "@/lib/actions/auth-actions";
 import toast from "react-hot-toast";
+import { useDynamicNavbar } from "@/hooks/useDynamicNavbar";
 
 export default function Navbar() {
   const [displayFixedNav, setDisplayFixedNav] = useState<boolean>(false);
   const [openMobileNavbar, setOpenMobileNavbar] = useState<boolean>(false);
-  const { isCompact } = useWindowSize();
+  const { isCompact, contentRef, containerRef } = useDynamicNavbar();
   const mobileOutsideRef = useRef(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -44,15 +44,20 @@ export default function Navbar() {
       router.push("/");
       toast.success("Çıkış yapıldı");
     } else {
-      toast.error(`${(result.error)}`);
+      toast.error(`${result.error}`);
     }
   };
 
   return (
     <>
       {/* Static Navbar */}
-      <header>
-        <div className="flex w-[92%] max-w-375 mx-auto items-center justify-between text-(--color-primary)">
+      <header className="flex justify-center mx-[4%]" 
+      ref={containerRef}
+      >
+        <div
+          className="flex whitespace-nowrap w-full max-w-375 items-center justify-between text-(--color-primary)"
+          ref={contentRef}
+        >
           <NavbarTitle currentNavTitle={currentNavTitle} />
 
           {isCompact ? (
@@ -103,7 +108,7 @@ export default function Navbar() {
           ) : (
             <NavbarLinks
               currentNavItems={currentNavItems}
-              className="hidden compact:flex"
+              className="opacity-0 compact:opacity-100"
               onLogout={handleLogout}
               isAdmin={isAdmin}
             />

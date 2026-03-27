@@ -18,14 +18,17 @@ export default function SmoothLink({
   const pathname = usePathname();
   const stringHref = href.toString();
 
-  const isAdminPath = pathname.startsWith("/admin");
-  const isAlreadyAdmin = stringHref.startsWith("/admin");
+  const isAlreadyAdmin = pathname.startsWith("/admin");
+  const isAdminPath = stringHref.startsWith("/admin");
+  const isHomePath = stringHref.startsWith("/home");
 
-  // let finalHref = stringHref;
   let finalHref = href;
-  if (isAdminPath && !isAlreadyAdmin) {
-    finalHref = `/admin${stringHref.startsWith("/") ? "" : "/"}${stringHref}`;
+  if (isHomePath) {
+    finalHref = stringHref.replace(/^\/home/, "") || "/";
   }
+  else if (isAlreadyAdmin && !isAdminPath) {
+    finalHref = `/admin${stringHref.startsWith("/") ? "" : "/"}${stringHref}`;
+  } 
 
   const onClickHandler = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (target === "_blank") return;

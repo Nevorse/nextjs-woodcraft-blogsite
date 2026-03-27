@@ -2,7 +2,6 @@
 import { AlbumWithContent, ContentTextValues } from "@/lib/database/album";
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { FolderWithAlbumsType } from "@/lib/database/albumFolder";
 import SmoothLink from "@/components/ui/general/SmoothLink";
 import ImageDropzone from "@/components/image-dropzone/ImageDropzone";
 import { getImagePath, restoreItemInOrder } from "@/lib/helpers/imageHelpers";
@@ -15,7 +14,7 @@ import { updateImageOrders } from "@/lib/actions/db/image-actions";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 import Input from "@/components/ui/form/Input";
-import { BreadcrumbItem, BreadcrumbNav } from "@/components/ui/general/BreadcrumbNav";
+import { BreadcrumbItem, BreadcrumbNav, getAlbumBreadcrumbs } from "@/components/ui/general/BreadcrumbNav";
 import { cn, normalize } from "@/lib/utils";
 import { isEqual } from "lodash";
 import { AlbumUpdateSafeInput, updateAlbumBySlug } from "@/lib/actions/db/album-actions";
@@ -28,19 +27,16 @@ type SimpleAlbumData = {
   images?: { uuid: string }[];
   [key: string]: unknown;
 };
-
 type AdminSingleAlbumClientProps = {
   albumData: AlbumWithContent;
   albumParam: string;
   otherAlbums: SimpleAlbumData[];
-  folderParam?: string | undefined;
   pageType: "projects" | "services";
 };
 export default function AdminSingleAlbumClient({
   albumData,
   albumParam,
   otherAlbums = [],
-  folderParam,
   pageType,
 }: AdminSingleAlbumClientProps) {
   const [albumImagesState, setAlbumImagesState] = useState(albumData.images || []);
@@ -63,6 +59,7 @@ export default function AdminSingleAlbumClient({
   }, []);
 
   useEffect(() => {
+    if (!albumData?.id || !scrollContainerRef.current) return;
     // scroll to active element
     const container = scrollContainerRef.current;
     if (container) {
@@ -81,7 +78,7 @@ export default function AdminSingleAlbumClient({
         }
       });
     }
-  }, [albumParam]);
+  }, [albumParam, albumData.id]);
 
   const processSave = async (
     isTextsModified: boolean,
@@ -161,20 +158,6 @@ export default function AdminSingleAlbumClient({
     };
   };
 
-  const breadcrumbItems: BreadcrumbItem[] = [
-    {
-      label: pageType === "projects" ? "Tüm Projeler" : "Tüm Hizmetler",
-      href: `/${pageType}`,
-    },
-  ];
-  if (albumData.folder?.title && folderParam) {
-    breadcrumbItems.push({
-      label: albumData.folder?.title ?? "Klasör",
-      href: `/${pageType}/${albumData.folder?.slug}`,
-    });
-  }
-  breadcrumbItems.push({ label: albumData.title ?? "Albüm" });
-
   return (
     <>
       <div className="flex justify-between gap-12">
@@ -182,14 +165,14 @@ export default function AdminSingleAlbumClient({
           <Input
             name="title"
             as="input"
-            outlined
+            focusOutline
             value={titleState}
             onChange={(e) => setTitleState(e.currentTarget.value)}
             className="truncate p-0! border-0! shadow-none!"
           />
         </div>
         <div className="w-1/3">
-          <BreadcrumbNav items={breadcrumbItems} />
+          <BreadcrumbNav items={getAlbumBreadcrumbs(albumData)} />
         </div>
       </div>
 
@@ -215,6 +198,7 @@ export default function AdminSingleAlbumClient({
               as="textarea"
               placeholder="Content Area"
               rows={3}
+              focusOutline
               value={contentState["content-1" as keyof ContentTextValues] || ""}
               onChange={(e) => {
                 setContentState((prev) => ({
@@ -234,21 +218,16 @@ export default function AdminSingleAlbumClient({
               2xl:max-h-[75vh] xl:max-h-[60vh] lg:max-h-[65vh] md:max-h-[55vh] sm:max-h-[45vh] max-h-[40vh]
               [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-(--theme-tertiary) [&::-webkit-scrollbar-thumb]:rounded-full"
           >
-            {otherAlbums?.map((item) => {
-              const itemHref =
-                folderParam
-                  ? `/${pageType}/${folderParam}/${item.slug}`
-                  : `/${pageType}/${item.slug}`;
+            {otherAlbums.map((item) => {
+              const itemHref = albumData.folder?.slug
+                ? `/${pageType}/${albumData.folder.slug}/${item.slug}`
+                : `/${pageType}/${item.slug}`;
 
               return (
-                <SmoothLink
-                  key={item.id}
-                  href={itemHref} // Ortak alan
-                  id={`album-${item.id}`}
-                >
+                <SmoothLink key={item.id} href={itemHref} id={`album-${item.id}`}>
                   <div
                     className={`px-4 py-3 max-h-12 truncate transition-all bg-neutral-200 text-(--color-primary) ${
-                      item.id == albumData.id
+                      item.id === albumData.id
                         ? "bg-(--theme-quaternary)! text-neutral-200!"
                         : "hover:bg-(--theme-quaternary) hover:text-(--color-secondary) hover:opacity-90"
                     }`}
@@ -263,7 +242,6 @@ export default function AdminSingleAlbumClient({
       </div>
 
       <div className="my-12">
-        {/* Ortak alan */}
         <ImageDropzone
           xType={pageType}
           parentId={albumData.id}
@@ -272,8 +250,8 @@ export default function AdminSingleAlbumClient({
       </div>
       <div className="flex flex-col justify-center items-center">
         <span>
-          <span className="underline">Başlığı, içerik yazısını ve resim sırasını</span> değiştirdikten sonra
-          kaydediniz.
+          <span className="underline">Başlığı, içerik yazısını ve resim sırasını</span>{" "}
+          değiştirdikten sonra kaydediniz.
         </span>
 
         <SubmitButton

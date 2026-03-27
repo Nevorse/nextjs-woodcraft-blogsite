@@ -1,5 +1,5 @@
 "use client";
-import { useWindowSize } from "@/components/hooks/useWindowSize";
+import { useWindowSize } from "@/hooks/useWindowSize";
 import Link from "next/link";
 import { FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 import { IoIosMail, IoLogoInstagram } from "react-icons/io";

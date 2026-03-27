@@ -1,11 +1,12 @@
 "use client";
+import { AlbumWithContent } from "@/lib/database/album";
 import SmoothLink from "./SmoothLink";
 
 export type BreadcrumbItem = { label: string; href?: string };
 
 export const BreadcrumbNav = ({ items }: { items: BreadcrumbItem[] }) => {
   return (
-    <nav className="flex text-sm text-(--theme-quaternary) truncate">
+    <nav className="flex justify-end text-sm text-(--theme-quaternary) truncate">
       {items.map((item, index) => (
         <div key={index} className="flex truncate">
           {item.href ? (
@@ -23,4 +24,26 @@ export const BreadcrumbNav = ({ items }: { items: BreadcrumbItem[] }) => {
       ))}
     </nav>
   );
+};
+
+export const getAlbumBreadcrumbs = (albumData: AlbumWithContent) => {
+  const isProject = albumData.type === "PROJECT_ALBUM";
+  const albumType = isProject ? "projects" : "services";
+
+  const breadcrumbItems: BreadcrumbItem[] = [
+    {
+      label: isProject ? "Tüm Projeler" : "Tüm Hizmetler",
+      href: `/${albumType}`,
+    },
+  ];
+
+  if (albumData.folder?.slug) {
+    breadcrumbItems.push({
+      label: albumData.folder.title ?? "Klasör",
+      href: `/${albumType}/${albumData.folder.slug}`,
+    });
+  }
+  breadcrumbItems.push({ label: albumData.title });
+
+  return breadcrumbItems;
 };

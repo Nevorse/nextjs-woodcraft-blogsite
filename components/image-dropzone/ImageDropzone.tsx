@@ -4,23 +4,12 @@ import { useDropzone } from "react-dropzone";
 import { LuUpload as UploadIcon } from "react-icons/lu";
 import toast from "react-hot-toast";
 import { WorkerResponse } from "@/lib/types/worker";
-import { saveImagesToAlbum, saveImageToFolder } from "@/lib/actions/db/image-actions";
+import { saveImagesToAlbum } from "@/lib/actions/db/image-actions";
 import { usePathname } from "next/navigation";
 import SubmitButton from "../ui/form/SubmitButton";
 import PreviewItem from "./PreviewItem";
 import DndSortableGrid from "../ui/admin/DndSortableGrid";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
-
-type UploadType = "cover" | "services" | "projects";
-
-type ImageDropzoneProps = {
-  xType: UploadType;
-  parentId: string | undefined;
-  parentFolderId?: string | undefined;
-  isSaveToFolder?: boolean;
-  isMultiple?: boolean;
-  compact?: boolean;
-};
 
 export type FilePreview = {
   id: string;
@@ -32,24 +21,31 @@ export type FilePreview = {
   error?: string;
 };
 
+type UploadType = "cover" | "services" | "projects";
+
+type ImageDropzoneProps = {
+  xType: UploadType;
+  parentId: string | undefined;
+  parentFolderId?: string | undefined;
+  isMultiple?: boolean;
+};
+
 export default function ImageDropzone({
   xType,
   parentId,
   parentFolderId,
-  isSaveToFolder = false,
   isMultiple = true,
-  compact = false,
 }: ImageDropzoneProps) {
   const previewsRef = useRef<FilePreview[]>([]);
   const [previews, setPreviews] = useState<FilePreview[]>([]);
   const pathname = usePathname();
   const uploadableStatuses = ["idle", "error"];
 
-  // Memory cleaning
+  // Keep the previews up-to-date with useRef
   useEffect(() => {
-    // Keep the previews up-to-date with useRef
     previewsRef.current = previews;
   }, [previews]);
+  // Memory cleaning
   useEffect(() => {
     return () => {
       previewsRef.current.forEach((p) => {
@@ -80,7 +76,7 @@ export default function ImageDropzone({
     onDropRejected: () => {
       toast.error("Geçersiz dosya tipi veya boyutu");
     },
-    multiple: isSaveToFolder ? false : isMultiple,
+    multiple: isMultiple,
     maxSize: 10 * 1024 * 1024, // 10MB
   });
 
@@ -196,13 +192,7 @@ export default function ImageDropzone({
       throw new Error(bucketResult.error);
     }
 
-    const dbAction = isSaveToFolder
-      ? saveImageToFolder({
-          path: bucketResult.successPaths[0],
-          folderId: parentId,
-          pathToRevalidate: pathname,
-        })
-      : saveImagesToAlbum({
+    const dbAction = saveImagesToAlbum({
           paths: bucketResult.successPaths,
           albumId: parentId,
           pathToRevalidate: pathname,

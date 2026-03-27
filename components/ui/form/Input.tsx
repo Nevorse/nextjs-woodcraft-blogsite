@@ -11,7 +11,7 @@ type InputProps = {
   rows?: number;
   type?: string;
   error?: string;
-  outlined?: boolean;
+  focusOutline?: boolean;
 } & Partial<CombinedProps>;
 
 const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
@@ -23,7 +23,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
       rows,
       type = "text",
       error,
-      outlined = false,
+      focusOutline = false,
       value,
       onChange,
       className,
@@ -37,7 +37,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
       `w-full p-3 bg-(--theme-primary) shadow-md border border-(--color-primary)
     [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-(--theme-tertiary) [&::-webkit-scrollbar-thumb]:rounded-full 
     [&::-webkit-resizer]:bg-(--theme-tertiary) [&::-webkit-scrollbar-corner]:bg-transparent [&::-webkit-resizer]:[clip-path:polygon(100%_0,100%_100%,0_100%)]`,
-    outlined ? "focus:outline-2 focus:outline-(--color-primary) focus:outline-offset-4 rounded-[1px]" : "outline-none",
+    focusOutline ? "focus:outline-2 focus:outline-(--color-primary) focus:outline-offset-4 rounded-[1px]" : "outline-none",
     error && "border-red-800",
     className,
     );
