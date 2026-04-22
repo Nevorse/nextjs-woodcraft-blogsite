@@ -34,8 +34,8 @@ type AdminAlbumsClientProps = {
 } & (
   | {
       mode: "folders" | "albums";
-      folderId: undefined;
-      thisComponentsImage: undefined;
+      folderId?: undefined;
+      thisComponentsImage?: undefined;
     }
   | {
       mode: "albumsInFolder";

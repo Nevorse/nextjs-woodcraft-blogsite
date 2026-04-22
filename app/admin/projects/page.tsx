@@ -19,7 +19,6 @@ export default async function AdminProjectsPage() {
           pageType="projects"
           itemsData={foldersData}
           mode="folders"
-          folderId={undefined}
         />
       </div>
     </div>

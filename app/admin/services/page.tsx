@@ -19,7 +19,6 @@ export default async function AdminServicePage() {
           pageType="services"
           itemsData={albumsData}
           mode="albums"
-          folderId={undefined}
         />
       </div>
     </div>
