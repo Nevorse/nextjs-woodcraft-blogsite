@@ -1,18 +1,29 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { WorkerResult } from "@/lib/types/worker";
+import { WorkerUploadResponse } from "@/lib/types/workerTypes";
 
 const workerURL = process.env.WORKER_URL;
 const secretKey = process.env.WORKER_SECRET;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const ALLOWED_X_TYPES = ["cover", "services", "projects"];
+const ALLOWED_MIME_TYPE = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_X_TYPE = ["cover", "services", "projects"];
 const MAX_FILES = 20;
 const MAX_DELETE_FILES = 50;
 
-export async function POST(request: Request) {
+export type UploadApiResponse =
+  | {
+      success: boolean;
+      files: WorkerUploadResponse[];
+      successPaths: string[];
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+export async function POST(request: Request): Promise<NextResponse<UploadApiResponse>> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -33,7 +44,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
 
     const xType = formData.get("x-type") as string;
-    if (!xType || !ALLOWED_X_TYPES.includes(xType)) {
+    if (!xType || !ALLOWED_X_TYPE.includes(xType)) {
       return NextResponse.json(
         { success: false, error: "Geçersiz albüm türü" },
         { status: 400 },
@@ -66,7 +77,7 @@ export async function POST(request: Request) {
           { status: 413 },
         );
       }
-      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      if (!ALLOWED_MIME_TYPE.includes(file.type)) {
         return NextResponse.json(
           { success: false, error: `"${file.type}" dosya türüne izin verilmiyor` },
           { status: 415 },
@@ -90,26 +101,22 @@ export async function POST(request: Request) {
         });
 
         if (!res.ok) {
-          let errorText = null;
-          try {
-            const data = await res.json();
-            errorText = data.error;
-          } catch {
-            errorText = await res.text();
-          }
+          const data = await res.json();
+          const errorText = data.error;
+
           throw new Error(`Worker error (${res.status}): ${errorText}`);
         }
         return res.json();
       }),
     );
 
-    const filesOut: WorkerResult[] = results.map((result) => {
+    const filesOut: WorkerUploadResponse[] = results.map((result) => {
       return result.status === "fulfilled"
-        ? { ok: true, data: result.value }
+        ? result.value
         : { ok: false, error: result.reason?.message ?? "Bilinmeyen Hata" };
     });
 
-    const successPaths = filesOut.flatMap((f) => (f.ok ? [f.data.file] : []));
+    const successPaths = filesOut.flatMap((f) => (f.ok ? [f.file] : []));
     const hasSuccess = successPaths.length > 0;
     const hasFailures = successPaths.length < filesOut.length;
 
@@ -159,45 +166,36 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const results = await Promise.allSettled(
-      files.map(async (file) => {
-        const res = await fetch(`${workerURL}?file=${encodeURIComponent(file)}`, {
-          method: "DELETE",
-          headers: {
-            "X-Worker-Secret": secretKey,
-          },
-        });
-        if (!res.ok) {
-          let errorText = null;
-          try {
-            const data = await res.json();
-            errorText = data.error;
-          } catch {
-            errorText = await res.text();
-          }
-          throw new Error(`Worker error (${res.status}): ${errorText}`);
-        }
-        return res.json();
-      }),
-    );
-
-    const filesOut: WorkerResult[] = results.map((result) => {
-      return result.status === "fulfilled"
-        ? { ok: true, data: result.value }
-        : { ok: false, error: result.reason?.message ?? "Bilinmeyen Hata" };
+    const response = await fetch(workerURL, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Worker-Secret": secretKey,
+      },
+      body: JSON.stringify({ files }),
     });
+    const data = await response.json();
 
-    const successPaths = filesOut.flatMap((f) => (f.ok ? [f.data.file] : []));
+    if (!response.ok) {
+      const errorText = data.error;
+      return { success: false, error: `Worker error (${response.status}): ${errorText}` };
+    }
+
+    const successPaths = data.results
+      .filter((r: { ok: boolean; file: string }) => r.ok)
+      .map((r: { file: string }) => r.file);
+    const failedPaths = data.results
+      .filter((r: { ok: boolean; file: string }) => !r.ok)
+      .map((r: { file: string }) => r.file);
     const hasSuccess = successPaths.length > 0;
-    const hasFailures = successPaths.length < filesOut.length;
+    const hasFailures = failedPaths.length > 0;
 
-    // Başarılı işlem varsa {success: true} gönder ve silme işlemine devam et.
     return NextResponse.json(
-      { success: hasSuccess, files: filesOut, successPaths },
+      { success: hasSuccess, successPaths, failedPaths },
       { status: !hasSuccess ? 400 : hasFailures ? 207 : 200 },
     );
   } catch (error) {
-    console.error("Upload Error:", error);
+    console.error("Delete Error:", error);
     return NextResponse.json(
       {
         success: false,
@@ -207,3 +205,41 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+// const results = await Promise.allSettled(
+//   files.map(async (file) => {
+//     const res = await fetch(`${workerURL}?file=${encodeURIComponent(file)}`, {
+//       method: "DELETE",
+//       headers: {
+//         "X-Worker-Secret": secretKey,
+//       },
+//     });
+//     if (!res.ok) {
+//       let errorText = null;
+//       try {
+//         const data = await res.json();
+//         errorText = data.error;
+//       } catch {
+//         errorText = await res.text();
+//       }
+//       throw new Error(`Worker error (${res.status}): ${errorText}`);
+//     }
+//     return res.json();
+//   }),
+// );
+
+// const filesOut: WorkerResult[] = results.map((result) => {
+//   return result.status === "fulfilled"
+//     ? { ok: true, data: result.value }
+//     : { ok: false, error: result.reason?.message ?? "Bilinmeyen Hata" };
+// });
+
+// const successPaths = filesOut.flatMap((f) => (f.ok ? [f.data.file] : []));
+// const hasSuccess = successPaths.length > 0;
+// const hasFailures = successPaths.length < filesOut.length;
+
+// // Başarılı işlem varsa {success: true} gönder ve silme işlemine devam et.
+// return NextResponse.json(
+//   { success: hasSuccess, files: filesOut, successPaths },
+//   { status: !hasSuccess ? 400 : hasFailures ? 207 : 200 },
+// );

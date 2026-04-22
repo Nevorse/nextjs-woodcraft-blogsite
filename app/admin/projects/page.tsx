@@ -18,7 +18,7 @@ export default async function AdminProjectsPage() {
         <AdminAlbumsClient
           pageType="projects"
           itemsData={foldersData}
-          mode="folder"
+          mode="folders"
           folderId={undefined}
         />
       </div>

@@ -16,8 +16,10 @@ export async function saveImageToFolder({
     if (!path) return { success: false, error: "UUID eksik." };
     if (!folderId) return { success: false, error: "Folder ID'si eksik." };
 
-    await prisma.image.create({
-      data: { uuid: path, folderId },
+    await prisma.image.upsert({
+      where: { folderId },
+      update: { uuid: path },
+      create: { uuid: path, folderId },
     });
 
     if (pathToRevalidate) {

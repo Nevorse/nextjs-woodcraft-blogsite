@@ -5,7 +5,7 @@ import HomeProjects from "./HomeProjects";
 export default function Home() {
 
   return (
-    <div className="max-w-[92%] min-h-[90vh] mx-auto text-center color-white">
+    <div className="w-[92%] min-h-[90vh] mx-auto text-center color-white">
       <HomeSlider />
       <HomeServices />
       <HomeProjects />

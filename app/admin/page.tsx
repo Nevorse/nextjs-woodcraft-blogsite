@@ -17,7 +17,7 @@ export default async function AdminPage() {
   const coverTexts = coverAlbumData?.content || {};
   return (
     <>
-      <div className="max-w-[92%] min-h-[90vh] mx-auto text-center color-white">
+      <div className="w-[92%] min-h-[90vh] mx-auto text-center color-white">
         <SmoothLink href={"/admin/cover"}>
           <HomeSlider
             coverImages={coverAlbumData?.images}

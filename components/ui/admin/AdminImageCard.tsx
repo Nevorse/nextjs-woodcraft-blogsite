@@ -2,7 +2,6 @@
 import { getImagePath } from "@/lib/helpers/imageHelpers";
 import Image from "next/image";
 import SubmitButton from "../form/SubmitButton";
-import { WorkerResponse } from "@/lib/types/worker";
 import { removeImagesFromAlbum } from "@/lib/actions/db/image-actions";
 import toast from "react-hot-toast";
 import { usePathname } from "next/navigation";
@@ -32,25 +31,24 @@ export default function AdminImageCard({
   const pathname = usePathname();
 
   const deleteImageFromBucket: () => Promise<
-    | { success: false; error: string }
-    | { success: true; successPaths: string[]; total: number }
+    { success: false; error: string } | { success: true; successPaths: string[] }
   > = async () => {
-    const fileToDelete = [itemData.uuid];
+    const fileToDelete = itemData.uuid;
     if (!fileToDelete) {
       return { success: false, error: "UUID Bulunamadı" };
     }
 
     const res = await fetch("/api/worker/images", {
       method: "DELETE",
-      body: JSON.stringify({ files: fileToDelete }),
+      body: JSON.stringify({ files: [fileToDelete] }),
     });
 
-    const data = await res.json();
+    const responseData = await res.json();
 
     if (!res.ok) {
-      return { success: false, error: data.error };
+      return { success: false, error: responseData.files[0]?.error || "Bilinmeyen Hata" };
     }
-    const responseData = data as WorkerResponse;
+    
     if (!responseData.success) {
       return responseData;
     }
@@ -58,7 +56,7 @@ export default function AdminImageCard({
     return {
       success: true,
       successPaths: responseData.successPaths,
-      total: responseData.files.length,
+      // total: responseData.files.length,
     };
   };
 
@@ -75,8 +73,8 @@ export default function AdminImageCard({
       throw new Error(dbResult.error);
     }
 
-    const failedCount = bucketResult.total - dbResult.count;
-    return { successCount: dbResult.count, failedCount };
+    // const failedCount = bucketResult.total - dbResult.count;
+    return { successCount: dbResult.count /* failedCount */ };
   };
 
   const handleDeleteClick = async () => {
@@ -84,16 +82,13 @@ export default function AdminImageCard({
     try {
       await toast.promise(processDelete(), {
         loading: "Resimler Siliniyor...",
-        success: (data) =>
-          data.failedCount > 0
-            ? `${data.successCount} resim başarıyla silindi (${data.failedCount} Başarısız!).`
-            : `${data.successCount} resim başarıyla silindi.`,
+        success: (data) => `${data.successCount} resim başarıyla silindi.`,
         error: (err) => `Bir hata oluştu: ${err.message}`,
       });
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error(error, errorMessage);
-      restore?.(errorMessage);
+      const errorMsg = getErrorMessage(error);
+      console.error(error, errorMsg);
+      restore?.(errorMsg);
     }
   };
 

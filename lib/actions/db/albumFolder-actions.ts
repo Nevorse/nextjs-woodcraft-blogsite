@@ -7,6 +7,7 @@ import { generateIncrementalTitle } from "@/lib/utils";
 import { FolderType } from "@/lib/generated/prisma/enums";
 
 type SimpleFolderType = "projects";
+
 export async function createAlbumFolder({
   type,
   pathToRevalidate,
@@ -107,5 +108,33 @@ export async function updateFolderOrders({
     return { success: true };
   } catch (error) {
     return handleDbActionError(error, "updateFolderOrders");
+  }
+}
+
+export async function deleteFolderById({
+  id,
+  pathToRevalidate,
+}: {
+  id: string;
+  pathToRevalidate?: string;
+}): Promise<{ success: true; id: string; title: string } | { success: false; error: string }> {
+  try {
+
+    if (!id || id.trim() === "") {
+      return { success: false, error: "Geçersiz folder ID" };
+    }
+
+    const result = await prisma.albumFolder.delete({
+      where: { id },
+    });
+
+    if (pathToRevalidate) {
+      revalidatePath(pathToRevalidate);
+    }
+
+    return { success: true, id: result.id, title: result.title };
+
+  } catch (error) {
+    return handleDbActionError(error, "deleteFolderById");
   }
 }

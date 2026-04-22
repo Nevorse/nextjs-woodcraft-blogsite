@@ -3,13 +3,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { LuUpload as UploadIcon } from "react-icons/lu";
 import toast from "react-hot-toast";
-import { WorkerResponse } from "@/lib/types/worker";
-import { saveImagesToAlbum } from "@/lib/actions/db/image-actions";
+import { saveImagesToAlbum, saveImageToFolder } from "@/lib/actions/db/image-actions";
 import { usePathname } from "next/navigation";
 import SubmitButton from "../ui/form/SubmitButton";
 import PreviewItem from "./PreviewItem";
 import DndSortableGrid from "../ui/admin/DndSortableGrid";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
+import { UploadApiResponse } from "@/app/api/worker/images/route";
 
 export type FilePreview = {
   id: string;
@@ -28,6 +28,8 @@ type ImageDropzoneProps = {
   parentId: string | undefined;
   parentFolderId?: string | undefined;
   isMultiple?: boolean;
+  isFolderImage?: boolean;
+  deleteOldImage?: () => Promise<{ success: false; error: string } | { success: true }>;
 };
 
 export default function ImageDropzone({
@@ -35,6 +37,8 @@ export default function ImageDropzone({
   parentId,
   parentFolderId,
   isMultiple = true,
+  isFolderImage = false,
+  deleteOldImage,
 }: ImageDropzoneProps) {
   const previewsRef = useRef<FilePreview[]>([]);
   const [previews, setPreviews] = useState<FilePreview[]>([]);
@@ -55,15 +59,23 @@ export default function ImageDropzone({
   }, []);
 
   // Dropzone
-  const onDrop = useCallback((accepted: File[]) => {
-    const newPreviews = accepted.map((file) => ({
-      id: Math.random().toString(36).substring(7),
-      file,
-      preview: URL.createObjectURL(file),
-      status: "idle" as const,
-    }));
-    setPreviews((prev) => [...prev, ...newPreviews]);
-  }, []);
+  const onDrop = useCallback(
+    (accepted: File[]) => {
+      const newPreviews = accepted.map((file) => ({
+        id: Math.random().toString(36).substring(7),
+        file,
+        preview: URL.createObjectURL(file),
+        status: "idle" as const,
+      }));
+
+      if (isMultiple) {
+        setPreviews((prev) => [...prev, ...newPreviews]);
+      } else {
+        setPreviews([...newPreviews.slice(0, 1)]);
+      }
+    },
+    [isMultiple],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -122,16 +134,18 @@ export default function ImageDropzone({
       method: "POST",
       body: formData,
     });
-    const data = await res.json();
+    const responseData: UploadApiResponse = await res.json();
 
-    if (!res.ok) {
-      return { success: false, error: data.error };
-    }
-    const responseData = data as WorkerResponse;
-    if (!responseData.success) {
-      return responseData;
+    if (!res.ok || !responseData.success) {
+      const error =
+        "error" in responseData
+          ? responseData.error
+          : responseData.files.find((f) => !f.ok)?.error;
+
+      return { success: false, error: error ?? `Sunucu hatası: ${res.status}` };
     }
 
+    // Map results to previews
     const failedItems = responseData.files
       .map((result, index): FilePreview | null => {
         if (!result.ok) {
@@ -151,7 +165,7 @@ export default function ImageDropzone({
           return {
             ...filesToUpload[index],
             status: "done" as const,
-            fileUuid: result.data.file,
+            fileUuid: result.file,
           };
         }
         return null;
@@ -166,15 +180,12 @@ export default function ImageDropzone({
           return failed ? { ...p, status: "error", error: failed.error } : p;
         }),
     );
+    // Yüklenenleri temizle
     if (successItems.length) {
-      // Yüklenenleri temizle
       successItems.forEach((item) => {
         URL.revokeObjectURL(item.preview);
       });
     }
-    // const successUuids = successItems
-    //   .map((f) => f.fileUuid)
-    //   .filter((uuid): uuid is string => Boolean(uuid));
 
     return {
       success: true,
@@ -187,14 +198,21 @@ export default function ImageDropzone({
     if (!parentId) {
       throw new Error("Albüm ID Bulunamadı!");
     }
+
     const bucketResult = await uploadImagesToBucket();
     if (!bucketResult.success) {
       throw new Error(bucketResult.error);
     }
 
-    const dbAction = saveImagesToAlbum({
+    const dbAction = !isFolderImage
+      ? saveImagesToAlbum({
           paths: bucketResult.successPaths,
           albumId: parentId,
+          pathToRevalidate: pathname,
+        })
+      : saveImageToFolder({
+          path: bucketResult.successPaths[0],
+          folderId: parentId,
           pathToRevalidate: pathname,
         });
 
@@ -202,6 +220,14 @@ export default function ImageDropzone({
 
     if (!dbResult.success) {
       throw new Error(dbResult.error);
+    }
+
+    // Folder Image Yüklerken eski resmi sil
+    if (deleteOldImage) {
+      const deleteResult = await deleteOldImage();
+      if (!deleteResult.success) {
+        throw new Error(deleteResult.error);
+      }
     }
 
     const failedCount = bucketResult.total - dbResult.count;
@@ -281,7 +307,7 @@ export default function ImageDropzone({
 
       {/* Previews and Dnd */}
 
-      {previews.length > 0 && (
+      {isMultiple && previews.length > 0 && (
         <DndSortableGrid itemState={previews} setItemState={setPreviews}>
           <div className="grid 2xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-3">
             {previews.map((item) => (
@@ -294,6 +320,17 @@ export default function ImageDropzone({
             ))}
           </div>
         </DndSortableGrid>
+      )}
+
+      {!isMultiple && previews[0] && (
+        <div className="flex 2xl:h-[380px] h-[300px]">
+          <PreviewItem
+            key={previews[0].id}
+            item={previews[0]}
+            removeFile={removeFile}
+            uploadableStatuses={uploadableStatuses}
+          />
+        </div>
       )}
     </div>
   );

@@ -8,11 +8,14 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-  // DragStartEvent,
+  DragStartEvent,
   // DragOverlay,
 } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
-import { useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+
+const DndDataContext = createContext<{ activeId: string | null }>({ activeId: null });
+export const useDndData = () => useContext(DndDataContext);
 
 type ItemType = {
   id: string;
@@ -31,8 +34,9 @@ export default function DndSortableGrid<T extends ItemType>({
   initialItems = [],
   children,
 }: DndSortableGridProps<T>) {
-  // const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   // const activeItem = itemState.find((item) => (item.id === activeId ? item : null));
+
   const prevInitialItemsRef = useRef(initialItems);
 
   useEffect(() => {
@@ -69,14 +73,14 @@ export default function DndSortableGrid<T extends ItemType>({
     }),
   );
 
-  // const handleDragStart = (event: DragStartEvent) => {
-  //   setActiveId(event.active.id as string);
-  // };
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    // setActiveId(null);
+    setActiveId(null);
 
     if (!over || active.id === over.id) return;
 
@@ -93,19 +97,30 @@ export default function DndSortableGrid<T extends ItemType>({
       id="cover-page-images-dragndrop"
       sensors={DndSensors}
       collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={itemState.map((i) => i.id)} strategy={rectSortingStrategy}>
-        {children}
-      </SortableContext>
+      <DndDataContext.Provider value={{ activeId }}>
+        <SortableContext
+          items={itemState.map((i) => i.id)}
+          strategy={rectSortingStrategy}
+        >
+          {children}
+        </SortableContext>
+      </DndDataContext.Provider>
 
-      {/* Overlay için dummy kullan */}
+    </DndContext>
+  );
+}
 
-      {/* <DragOverlay>
+{
+  /* Overlay için dummy kullan */
+}
+
+{
+  /* <DragOverlay>
         {activeItem ? (
           <AdminCompCardDummy itemData={activeItem} image="1" />
         ) : null}
-      </DragOverlay> */}
-    </DndContext>
-  );
+      </DragOverlay> */
 }

@@ -16,12 +16,14 @@ import {
   createAlbumFolder,
   updateFolderOrders,
 } from "@/lib/actions/db/albumFolder-actions";
+import ImageDropzone from "@/components/image-dropzone/ImageDropzone";
 
 type AdminItemData = {
   id: string;
   title: string;
   order: number;
   slug: string;
+  computedImageHref?: string | undefined | null;
   images?: { uuid: string }[];
   folderImage?: { uuid: string } | null;
   [key: string]: unknown;
@@ -30,25 +32,46 @@ type AdminAlbumsClientProps = {
   pageType: "projects" | "services";
   itemsData: AdminItemData[];
 } & (
-  | { mode: "folder" | "album"; folderId: undefined }
-  | { mode: "albumInFolder"; folderId: string }
+  | {
+      mode: "folders" | "albums";
+      folderId: undefined;
+      thisComponentsImage: undefined;
+    }
+  | {
+      mode: "albumsInFolder";
+      folderId: string;
+      thisComponentsImage: string | undefined | null;
+    }
 );
 export default function AdminAlbumsClient({
   pageType,
   itemsData = [],
   mode,
   folderId,
+  thisComponentsImage,
 }: AdminAlbumsClientProps) {
-  const [itemsDataState, setItemsDataState] = useState(itemsData);
+  const getImageUuid = (item: AdminItemData, mode: string) => {
+    if (mode === "folders") {
+      return item.folderImage?.uuid;
+    }
+    return item.images?.[0]?.uuid;
+  };
+  const processedItems = itemsData.map((item) => ({
+    ...item,
+    computedImageHref: getImageUuid(item, mode),
+  }));
+
+  const [itemsDataState, setItemsDataState] = useState(processedItems);
+  const [openDropzone, setOpenDropzone] = useState(false);
   const pathname = usePathname();
 
   const createNewAlbum = async () => {
     const createAlbum =
-      mode === "folder" && pageType === "projects"
+      mode === "folders" && pageType === "projects"
         ? createAlbumFolder({ type: pageType, pathToRevalidate: pathname })
-        : mode === "albumInFolder"
+        : mode === "albumsInFolder"
           ? createAlbumForFolder({ folderId, type: pageType, pathToRevalidate: pathname })
-          : mode === "album"
+          : mode === "albums"
             ? createStandaloneAlbum({ type: pageType, pathToRevalidate: pathname })
             : undefined;
     if (!createAlbum) {
@@ -59,7 +82,7 @@ export default function AdminAlbumsClient({
     const result = await createAlbum;
 
     if (result.success) {
-      toast.success(`${mode === "folder" ? "Klasör" : "Albüm"} oluşturuldu`);
+      toast.success(`${mode === "folders" ? "Klasör" : "Albüm"} oluşturuldu`);
     } else {
       toast.error(result.error);
     }
@@ -67,7 +90,7 @@ export default function AdminAlbumsClient({
 
   const processSave = async () => {
     const updateOrder =
-      mode === "folder"
+      mode === "folders"
         ? updateFolderOrders({ folders: itemsDataState, pathToRevalidate: pathname })
         : updateAlbumOrders({ albums: itemsDataState, pathToRevalidate: pathname });
 
@@ -98,34 +121,77 @@ export default function AdminAlbumsClient({
     }
   };
 
-  const getImageUuid = (item: AdminItemData, mode: string) => {
-    if (mode === "folder") {
-      return item.folderImage?.uuid;
+  const handleDeleteOldImage: () => Promise<
+    { success: false; error: string } | { success: true }
+  > = async () => {
+    if (!thisComponentsImage) {
+      return { success: false, error: "Silinecek eski resim bulunamadı" };
     }
-    return item.images?.[0]?.uuid;
+    const res = await fetch("/api/worker/images", {
+      method: "DELETE",
+      body: JSON.stringify({ files: [thisComponentsImage] }),
+    });
+    
+    const responseData = await res.json();
+
+    if (!res.ok) {
+      return { success: false, error: responseData.files[0]?.error || "Bilinmeyen Hata" };
+    }
+
+    if (!responseData.success) {
+      return responseData;
+    }
+    return {
+      success: true,
+    };
   };
+
   return (
     <>
-      <SubmitButton
-        onClick={createNewAlbum}
-        className="bg-(--theme-tertiary)!"
-        buttonName={`Yeni ${mode === "folder" ? "Klasör" : "Albüm"} Oluştur`}
-        pendingButtonName="Oluşturuluyor..."
-        type="button"
-      />
+      <div className="flex gap-10">
+        <SubmitButton
+          onClick={createNewAlbum}
+          className="bg-(--theme-tertiary)!"
+          buttonName={`Yeni ${mode === "folders" ? "Klasör" : "Albüm"} Oluştur`}
+          pendingButtonName="Oluşturuluyor..."
+          type="button"
+        />
+
+        {mode === "albumsInFolder" && (
+          <SubmitButton
+            onClick={() => setOpenDropzone((p) => !p)}
+            className="bg-(--theme-tertiary)"
+            buttonName={`Klasör Resmi${thisComponentsImage ? "ni Değiştir" : " Ekle"}`}
+            type="button"
+          />
+        )}
+      </div>
+
+      {/* framer-motion kullan */}
+      {openDropzone && (
+        <div className="mt-8">
+          <ImageDropzone
+            parentId={folderId}
+            xType="projects"
+            isMultiple={false}
+            isFolderImage={mode === "albumsInFolder" ? true : false}
+            deleteOldImage={mode === "albumsInFolder" && thisComponentsImage ? handleDeleteOldImage : undefined}
+          />
+        </div>
+      )}
 
       <SubmitButton
         buttonName="Kaydet"
         pendingButtonName="Kaydediliyor..."
         type="button"
-        className={`mt-10`}
+        className={`mt-8`}
         onClick={handleSave}
       />
 
       <DndSortableGrid
         itemState={itemsDataState}
         setItemState={setItemsDataState}
-        initialItems={itemsData}
+        initialItems={processedItems}
       >
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-20 my-20">
           {itemsDataState.map((item) => (
@@ -134,7 +200,10 @@ export default function AdminAlbumsClient({
               itemId={item.id}
               itemHref={`${pathname}/${item.slug}`}
               itemTitle={item.title}
-              imageHref={getImageUuid(item, mode)}
+              imageHref={item.computedImageHref}
+              mode={mode === "folders" ? "folder" : "album"}
+              type={pageType}
+              parentId={folderId}
             />
           ))}
         </div>

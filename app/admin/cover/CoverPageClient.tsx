@@ -6,8 +6,8 @@ import AdminImageCard, { ImageCardType } from "@/components/ui/admin/AdminImageC
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  updateSiteSettings,
-  UpdateSiteSettingsParams,
+  UpsertSiteSettingsParams,
+  upsertSiteSettings,
 } from "@/lib/actions/db/siteSettings-actions";
 import { isEqual } from "lodash";
 import { updateAlbumBySlug } from "@/lib/actions/db/album-actions";
@@ -45,12 +45,12 @@ export default function CoverPageClient({
 
   const processSave = async (
     isLimitsChanged: boolean,
-    limitDataToUpdate: UpdateSiteSettingsParams,
+    limitDataToUpdate: UpsertSiteSettingsParams,
     isTextsModified: boolean,
     orderChanged: boolean,
   ) => {
     if (isLimitsChanged) {
-      const result = await updateSiteSettings({ data: limitDataToUpdate });
+      const result = await upsertSiteSettings({ data: limitDataToUpdate });
       if (!result.success) {
         throw new Error(result.error);
       }
@@ -59,7 +59,9 @@ export default function CoverPageClient({
     if (isTextsModified) {
       const result = await updateAlbumBySlug({
         slug: "cover-album",
-        data: { content: coverTextValues },
+        data: { 
+          content: coverTextValues
+         },
       });
       if (!result.success) {
         throw new Error(result.error);
@@ -77,7 +79,7 @@ export default function CoverPageClient({
 
   const handleSave = async () => {
     // Limits
-    const limitDataToUpdate: UpdateSiteSettingsParams = {
+    const limitDataToUpdate: UpsertSiteSettingsParams = {
       ...(coverImageLimitState !== initialCoverImageLimit && {
         coverImageLimit: coverImageLimitState,
       }),

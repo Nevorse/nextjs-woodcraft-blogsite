@@ -4,6 +4,8 @@ import { AlbumType } from "@/lib/generated/prisma/enums";
 
 const albumsData = await getAlbumsByType(AlbumType.SERVICE_ALBUM);
 
+console.log(albumsData);
+
 export default function HomeServices() {
   return (
     <div className="w-full mt-36 pb-10">

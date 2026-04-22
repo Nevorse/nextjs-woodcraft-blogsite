@@ -2,7 +2,7 @@
 import { AlbumWithContent } from "@/lib/database/album";
 import SmoothLink from "./SmoothLink";
 
-export type BreadcrumbItem = { label: string; href?: string };
+type BreadcrumbItem = { label: string; href?: string };
 
 export const BreadcrumbNav = ({ items }: { items: BreadcrumbItem[] }) => {
   return (

@@ -14,18 +14,18 @@ const SettingsSchema = z
   })
   .strict();
 
-export type UpdateSiteSettingsParams = {
+export type UpsertSiteSettingsParams = {
   serviceAlbumLimit?: number;
   projectAlbumLimit?: number;
   coverImageLimit?: number;
   coverTextLimit?: number;
   isRegistrationOpen?: boolean;
 };
-export async function updateSiteSettings({
+export async function upsertSiteSettings({
   data,
   pathToRevalidate,
 }: {
-  data: UpdateSiteSettingsParams;
+  data: UpsertSiteSettingsParams;
   pathToRevalidate?: string;
 }): Promise<{ success: true } | { success: false; error: string }> {
   try {

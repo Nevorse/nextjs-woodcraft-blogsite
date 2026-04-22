@@ -16,7 +16,16 @@ const AlbumSchema = z
     content: z.record(ContentKeySchema, z.string().nullable().optional()).optional(),
   })
   .strict();
+
+type SimpleAlbumType = "cover" | "projects" | "services";
+const albumTypeMap: Record<SimpleAlbumType, AlbumType> = {
+  cover: "COVER_ALBUM",
+  projects: "PROJECT_ALBUM",
+  services: "SERVICE_ALBUM",
+};
+
 export type AlbumUpdateSafeInput = Pick<AlbumUpdateInput, "content" | "title" | "order">;
+
 export async function updateAlbumBySlug({
   slug,
   data,
@@ -37,7 +46,7 @@ export async function updateAlbumBySlug({
       return { success: false, error: "Veri formatı hatalı" };
     }
 
-    const updateData: AlbumUpdateInput = { ...cleanData };
+    const updateData = { ...cleanData };
 
     if (updateData.title && typeof updateData.title === "string") {
       updateData.slug = slugify(updateData.title, {
@@ -98,12 +107,6 @@ export async function updateAlbumOrders({
   }
 }
 
-type SimpleAlbumType = "cover" | "projects" | "services";
-const albumTypeMap: Record<SimpleAlbumType, AlbumType> = {
-  cover: "COVER_ALBUM",
-  projects: "PROJECT_ALBUM",
-  services: "SERVICE_ALBUM",
-};
 export async function createAlbumForFolder({
   folderId,
   type,
@@ -120,7 +123,7 @@ export async function createAlbumForFolder({
   try {
     const validAlbumType = albumTypeMap[type];
     if (!validAlbumType) {
-      return { success: false, error: `Geçersiz klasör tipi: ${type}` };
+      return { success: false, error: `Geçersiz albüm tipi: ${type}` };
     }
 
     const folder = await prisma.albumFolder.findUnique({
@@ -185,14 +188,16 @@ export async function createAlbumForFolder({
 
 export async function createStandaloneAlbum({
   type,
-  pathToRevalidate,
   title,
   isPublished,
+  pathToRevalidate,
+  albumId,
 }: {
   type: SimpleAlbumType;
-  pathToRevalidate?: string;
   title?: string;
   isPublished?: boolean;
+  pathToRevalidate?: string;
+  albumId?: string;
 }): Promise<{ success: true } | { success: false; error: string }> {
   try {
     const validAlbumType = albumTypeMap[type];
@@ -233,10 +238,11 @@ export async function createStandaloneAlbum({
 
     await prisma.album.create({
       data: {
-        title: resolvedTitle,
-        order: nextOrder,
-        slug: slug,
+        id: albumId ? albumId : undefined,
         type: validAlbumType,
+        title: resolvedTitle,
+        slug: slug,
+        order: nextOrder,
         isPublished,
       },
     });
@@ -249,3 +255,96 @@ export async function createStandaloneAlbum({
     return handleDbActionError(error, "createStandaloneAlbum");
   }
 }
+
+export async function deleteAlbumById({
+  id,
+  pathToRevalidate,
+}: {
+  id: string;
+  pathToRevalidate?: string;
+}): Promise<
+  { success: true; id: string; title: string } | { success: false; error: string }
+> {
+  try {
+    if (!id || id.trim() === "") {
+      return { success: false, error: "Geçersiz album ID" };
+    }
+
+    const result = await prisma.album.delete({
+      where: { id },
+    });
+
+    if (pathToRevalidate) {
+      revalidatePath(pathToRevalidate);
+    }
+
+    return { success: true, id: result.id, title: result.title };
+  } catch (error) {
+    return handleDbActionError(error, "deleteAlbumById");
+  }
+}
+
+
+
+// export async function upsertAlbumByID({
+//   id,
+//   data,
+//   type,
+//   pathToRevalidate,
+// }: {
+//   id: string;
+//   data: AlbumUpdateSafeInput;
+//   type: SimpleAlbumType;
+//   pathToRevalidate?: string;
+// }): Promise<{ success: true } | { success: false; error: string }> {
+//   try {
+//     const validAlbumType = albumTypeMap[type];
+//     if (!validAlbumType) {
+//       return { success: false, error: `Geçersiz albüm tipi: ${type}` };
+//     }
+
+//     const cleanData = Object.fromEntries(
+//       Object.entries(data).filter(([_, value]) => value != null && value !== ""),
+//     );
+//     const validation = AlbumSchema.safeParse(cleanData);
+//     if (!validation.success) {
+//       return { success: false, error: "Veri formatı hatalı" };
+//     }
+
+//     const updateData = { ...cleanData };
+
+//     if (updateData.title && typeof updateData.title === "string") {
+//       updateData.slug = slugify(updateData.title, {
+//         lower: true,
+//         strict: true,
+//         trim: true,
+//       });
+//     }
+
+//     await prisma.album.upsert({
+//       where: { id },
+//       update: {
+//         ...updateData,
+//       },
+//       create: {
+//         id,
+//         type: validAlbumType,
+//         title: typeof updateData.title === "string" ? updateData.title : "Yeni Albüm",
+//         slug:
+//           typeof updateData.title === "string"
+//             ? slugify(updateData.title, { lower: true, strict: true, trim: true })
+//             : slugify("Yeni Albüm", { lower: true, strict: true, trim: true }),
+//         content: updateData.content,
+//       },
+//     });
+
+//     if (pathToRevalidate) {
+//       revalidatePath(pathToRevalidate);
+//     }
+//     return {
+//       success: true,
+//     };
+//   } catch (error) {
+//     return handleDbActionError(error, "upsertAlbumByID");
+//   }
+// }

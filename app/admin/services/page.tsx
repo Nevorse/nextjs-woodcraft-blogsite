@@ -12,13 +12,13 @@ export default async function AdminServicePage() {
     <div className="max-w-[85%] min-h-[90vh] mx-auto mt-12">
       <div className="flex flex-col justify-center items-center">
         <h1 className="text-3xl font-bold tracking-wider mb-4 text-center text-(--color-primary)">
-          Servislerimiz
+          Hizmetlerimiz
         </h1>
 
         <AdminAlbumsClient
           pageType="services"
           itemsData={albumsData}
-          mode="album"
+          mode="albums"
           folderId={undefined}
         />
       </div>

@@ -14,7 +14,7 @@ import { updateImageOrders } from "@/lib/actions/db/image-actions";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 import Input from "@/components/ui/form/Input";
-import { BreadcrumbItem, BreadcrumbNav, getAlbumBreadcrumbs } from "@/components/ui/general/BreadcrumbNav";
+import { BreadcrumbNav, getAlbumBreadcrumbs } from "@/components/ui/general/BreadcrumbNav";
 import { cn, normalize } from "@/lib/utils";
 import { isEqual } from "lodash";
 import { AlbumUpdateSafeInput, updateAlbumBySlug } from "@/lib/actions/db/album-actions";

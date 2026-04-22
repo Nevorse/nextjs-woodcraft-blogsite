@@ -23,8 +23,9 @@ export default async function AdminProjectFolderPage({
         <AdminAlbumsClient
           pageType="projects"
           itemsData={albumFolder.albums}
-          mode="albumInFolder"
+          mode="albumsInFolder"
           folderId={albumFolder.id}
+          thisComponentsImage={albumFolder.folderImage?.uuid}
         />
       </div>
     </div>
