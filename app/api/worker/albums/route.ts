@@ -1,28 +1,28 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { parseErrorMessage } from "@/lib/errorHandler/api-error-handler";
+import { WorkerBulkDeleteResponse } from "@/lib/types/workerTypes";
 
 const workerURL = process.env.WORKER_URL;
 const secretKey = process.env.WORKER_SECRET;
 
 const ALLOWED_X_TYPE = ["cover", "services", "projects"];
 
-type WorkerItemResult =
-  | { ok: true; file: string }
-  | { ok: false; file: string; error: string };
-
 export type BulkDeleteApiResponse =
   | {
-      success: boolean;
+      success: true;
       prefix: string;
       action: "delete";
       deleted: number;
-      //   results: WorkerItemResult[];
+      //   results: WorkerDeleteResult[];
     }
   | {
       success: false;
       error: string;
     };
+
+// WorkerBulkDeleteResponse
 
 export async function DELETE(
   request: Request,
@@ -74,18 +74,21 @@ export async function DELETE(
       body: JSON.stringify({ prefix }),
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      const errorText = data.error;
+      const errorText = await parseErrorMessage(response);
       return NextResponse.json({
         success: false,
         error: `Worker error (${response.status}): ${errorText}`,
       });
     }
 
+    const data: WorkerBulkDeleteResponse = await response.json();
+    if (!data.ok) {
+      return NextResponse.json({ success: false, error: data.error }, { status: 500 });
+    }
+
     return NextResponse.json({
-      success: data.ok,
+      success: true,
       prefix: prefix,
       action: "delete",
       deleted: data.deleted,

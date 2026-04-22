@@ -10,6 +10,7 @@ import PreviewItem from "./PreviewItem";
 import DndSortableGrid from "../ui/admin/DndSortableGrid";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 import { UploadApiResponse } from "@/app/api/worker/images/route";
+import { parseErrorMessage } from "@/lib/errorHandler/api-error-handler";
 
 export type FilePreview = {
   id: string;
@@ -134,14 +135,19 @@ export default function ImageDropzone({
       method: "POST",
       body: formData,
     });
+
+    if (!res.ok) {
+      const errorMessage = await parseErrorMessage(res);
+      return { success: false, error: errorMessage || `Sunucu hatası: ${res.status}` };
+    }
+
     const responseData: UploadApiResponse = await res.json();
 
-    if (!res.ok || !responseData.success) {
+    if (!responseData.success) {
       const error =
         "error" in responseData
           ? responseData.error
           : responseData.files.find((f) => !f.ok)?.error;
-
       return { success: false, error: error ?? `Sunucu hatası: ${res.status}` };
     }
 

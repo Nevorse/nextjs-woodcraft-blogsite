@@ -9,6 +9,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
+import { DeleteApiResponse } from "@/app/api/worker/images/route";
+import { parseErrorMessage } from "@/lib/errorHandler/api-error-handler";
 
 export type ImageCardType = {
   id: string;
@@ -43,20 +45,18 @@ export default function AdminImageCard({
       body: JSON.stringify({ files: [fileToDelete] }),
     });
 
-    const responseData = await res.json();
-
     if (!res.ok) {
-      return { success: false, error: responseData.files[0]?.error || "Bilinmeyen Hata" };
+      const errorMessage = await parseErrorMessage(res);
+      return { success: false, error: errorMessage || `Sunucu hatası: ${res.status}` };
     }
-    
-    if (!responseData.success) {
-      return responseData;
-    }
+
+    const responseData: DeleteApiResponse = await res.json();
+
+    if (!responseData.success) { return responseData; }
 
     return {
       success: true,
       successPaths: responseData.successPaths,
-      // total: responseData.files.length,
     };
   };
 

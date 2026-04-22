@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { WorkerUploadResponse } from "@/lib/types/workerTypes";
+import { WorkerDeleteResponse, WorkerUploadResponse } from "@/lib/types/workerTypes";
+import { parseErrorMessage } from "@/lib/errorHandler/api-error-handler";
 
 const workerURL = process.env.WORKER_URL;
 const secretKey = process.env.WORKER_SECRET;
@@ -17,6 +18,17 @@ export type UploadApiResponse =
       success: boolean;
       files: WorkerUploadResponse[];
       successPaths: string[];
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+export type DeleteApiResponse =
+  | {
+      success: true;
+      successPaths: string[];
+      failedPaths: string[];
     }
   | {
       success: false;
@@ -101,19 +113,28 @@ export async function POST(request: Request): Promise<NextResponse<UploadApiResp
         });
 
         if (!res.ok) {
-          const data = await res.json();
-          const errorText = data.error;
+          const errorText = await parseErrorMessage(res);
 
           throw new Error(`Worker error (${res.status}): ${errorText}`);
         }
-        return res.json();
+        return res.json() as Promise<WorkerUploadResponse>;
       }),
     );
 
     const filesOut: WorkerUploadResponse[] = results.map((result) => {
-      return result.status === "fulfilled"
-        ? result.value
-        : { ok: false, error: result.reason?.message ?? "Bilinmeyen Hata" };
+      if (result.status === "fulfilled") {
+        return result.value;
+      }
+
+      const reason = result.reason;
+      const error =
+        reason instanceof Error
+          ? reason.message
+          : typeof reason === "string"
+            ? reason
+            : "Bilinmeyen Hata";
+
+      return { ok: false, error };
     });
 
     const successPaths = filesOut.flatMap((f) => (f.ok ? [f.file] : []));
@@ -136,7 +157,7 @@ export async function POST(request: Request): Promise<NextResponse<UploadApiResp
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: Request): Promise<NextResponse<DeleteApiResponse>> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -157,7 +178,10 @@ export async function DELETE(request: Request) {
     const { files } = await request.json();
 
     if (!Array.isArray(files) || !files.every((f) => typeof f === "string")) {
-      return NextResponse.json({ error: "Geçersiz dosya listesi" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Geçersiz dosya listesi" },
+        { status: 400 },
+      );
     }
     if (files.length > MAX_DELETE_FILES) {
       return NextResponse.json(
@@ -174,25 +198,36 @@ export async function DELETE(request: Request) {
       },
       body: JSON.stringify({ files }),
     });
-    const data = await response.json();
 
     if (!response.ok) {
-      const errorText = data.error;
-      return { success: false, error: `Worker error (${response.status}): ${errorText}` };
+      const errorText = await parseErrorMessage(response);
+      return NextResponse.json(
+        { success: false, error: `Worker error (${response.status}): ${errorText}` },
+        { status: 500 },
+      );
     }
 
-    const successPaths = data.results
-      .filter((r: { ok: boolean; file: string }) => r.ok)
-      .map((r: { file: string }) => r.file);
-    const failedPaths = data.results
-      .filter((r: { ok: boolean; file: string }) => !r.ok)
-      .map((r: { file: string }) => r.file);
+    const data: WorkerDeleteResponse = await response.json();
+    if (!data.ok) {
+      return NextResponse.json({ success: false, error: data.error }, { status: 500 });
+    }
+
+    const results = data.results;
+    const successPaths = results.filter((r) => r.ok).map((r) => r.file);
+    const failedPaths = results.filter((r) => !r.ok).map((r) => r.file);
     const hasSuccess = successPaths.length > 0;
     const hasFailures = failedPaths.length > 0;
 
+    if (!hasSuccess) {
+      return NextResponse.json(
+        { success: false, error: "Hiçbir dosya silinemedi" },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json(
-      { success: hasSuccess, successPaths, failedPaths },
-      { status: !hasSuccess ? 400 : hasFailures ? 207 : 200 },
+      { success: true, successPaths, failedPaths },
+      { status: hasFailures ? 207 : 200 },
     );
   } catch (error) {
     console.error("Delete Error:", error);
@@ -205,41 +240,3 @@ export async function DELETE(request: Request) {
     );
   }
 }
-
-// const results = await Promise.allSettled(
-//   files.map(async (file) => {
-//     const res = await fetch(`${workerURL}?file=${encodeURIComponent(file)}`, {
-//       method: "DELETE",
-//       headers: {
-//         "X-Worker-Secret": secretKey,
-//       },
-//     });
-//     if (!res.ok) {
-//       let errorText = null;
-//       try {
-//         const data = await res.json();
-//         errorText = data.error;
-//       } catch {
-//         errorText = await res.text();
-//       }
-//       throw new Error(`Worker error (${res.status}): ${errorText}`);
-//     }
-//     return res.json();
-//   }),
-// );
-
-// const filesOut: WorkerResult[] = results.map((result) => {
-//   return result.status === "fulfilled"
-//     ? { ok: true, data: result.value }
-//     : { ok: false, error: result.reason?.message ?? "Bilinmeyen Hata" };
-// });
-
-// const successPaths = filesOut.flatMap((f) => (f.ok ? [f.data.file] : []));
-// const hasSuccess = successPaths.length > 0;
-// const hasFailures = successPaths.length < filesOut.length;
-
-// // Başarılı işlem varsa {success: true} gönder ve silme işlemine devam et.
-// return NextResponse.json(
-//   { success: hasSuccess, files: filesOut, successPaths },
-//   { status: !hasSuccess ? 400 : hasFailures ? 207 : 200 },
-// );

@@ -14,6 +14,8 @@ import { deleteFolderById } from "@/lib/actions/db/albumFolder-actions";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
+import { BulkDeleteApiResponse } from "@/app/api/worker/albums/route";
+import { parseErrorMessage } from "@/lib/errorHandler/api-error-handler";
 
 type AdminComponentCardProps = {
   itemId: string;
@@ -57,15 +59,14 @@ export default function AdminComponentCard({
       body: JSON.stringify({ prefix }),
     });
 
-    const responseData = await res.json();
-
     if (!res.ok) {
-      return { success: false, error: "Bilinmeyen Hata" };
+      const errorMessage = await parseErrorMessage(res);
+      return { success: false, error: errorMessage || `Sunucu hatası: ${res.status}` };
     }
 
-    if (!responseData.success) {
-      return responseData;
-    }
+    const responseData: BulkDeleteApiResponse = await res.json();
+
+    if (!responseData.success) { return responseData; }
 
     return {
       success: true,
