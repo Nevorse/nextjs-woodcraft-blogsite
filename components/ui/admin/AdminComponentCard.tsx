@@ -2,7 +2,7 @@
 import Image from "next/image";
 import SmoothLink from "../general/SmoothLink";
 import SubmitButton from "../form/SubmitButton";
-import { ConfirmDialog } from "../general/ConfirmDialog";
+// import { ConfirmDialog } from "../general/ConfirmDialog";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
@@ -16,8 +16,10 @@ import toast from "react-hot-toast";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 import { BulkDeleteApiResponse } from "@/app/api/worker/albums/route";
 import { parseErrorMessage } from "@/lib/errorHandler/api-error-handler";
+import { ConfirmOptions } from "@/hooks/useConfirmDialog";
 
 type AdminComponentCardProps = {
+  confirm: (opts: ConfirmOptions) => Promise<boolean>;
   itemId: string;
   itemHref: string;
   itemTitle: string;
@@ -28,6 +30,7 @@ type AdminComponentCardProps = {
 };
 
 export default function AdminComponentCard({
+  confirm,
   itemId,
   itemHref,
   itemTitle,
@@ -66,7 +69,9 @@ export default function AdminComponentCard({
 
     const responseData: BulkDeleteApiResponse = await res.json();
 
-    if (!responseData.success) { return responseData; }
+    if (!responseData.success) {
+      return responseData;
+    }
 
     return {
       success: true,
@@ -81,9 +86,9 @@ export default function AdminComponentCard({
 
     const deleteAlbum =
       mode === "album"
-        ? deleteAlbumById({ id: itemId, pathToRevalidate: pathname })
+        ? deleteAlbumById({ id: itemId })
         : mode === "folder"
-          ? deleteFolderById({ id: itemId, pathToRevalidate: pathname })
+          ? deleteFolderById({ id: itemId })
           : null;
 
     if (!deleteAlbum) {
@@ -100,6 +105,15 @@ export default function AdminComponentCard({
 
   const handleDeleteClick = async () => {
     try {
+      const ok = await confirm({
+        description: `${
+          mode === "album"
+            ? "Albümün içerisindeki bütün resimler"
+            : "Klasörün içerisindeki bütün albümler ve resimler"
+        } kalıcı olarak silinecek. Bu işlem geri alınamaz.`,
+      });
+      if (!ok) return;
+
       setIsPending(true);
       await toast.promise(processDelete(), {
         loading: mode === "album" ? "Albüm Siliniyor..." : "Klasör Siliniyor...",
@@ -164,18 +178,21 @@ export default function AdminComponentCard({
               isPending ? "opacity-100" : "",
             )}
           >
-            <ConfirmDialog // !!!
+            {/* <ConfirmDialog // !!!
               onConfirm={handleDeleteClick}
               description={`Klasörün içerisindeki bütün albümler ve resimler kalıcı olarak silinecek.\n Bu işlem geri alınamaz.`}
-            >
-              <SubmitButton
-                buttonName="Klasörü Sil"
-                pendingButtonName="Klasör Siliniyor..."
-                type="button"
-                className={"bg-orange-700 hover:opacity-95! cursor-pointer"}
-                isSubmitting={isPending}
-              />
-            </ConfirmDialog>
+            > */}
+            <SubmitButton
+              onClick={handleDeleteClick}
+              buttonName={mode === "album" ? "Albümü Sil" : "Klasörü Sil"}
+              pendingButtonName={
+                mode === "album" ? "Albüm Siliniyor..." : "Klasör Siliniyor..."
+              }
+              type="button"
+              className={"bg-orange-700 hover:opacity-95! cursor-pointer"}
+              isSubmitting={isPending}
+            />
+            {/* </ConfirmDialog> */}
           </div>
         )}
       </div>

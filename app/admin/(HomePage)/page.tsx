@@ -1,17 +1,28 @@
 import SmoothLink from "@/components/ui/general/SmoothLink";
-import HomeProjects from "../(root)/(HomePage)/HomeProjects";
-import HomeServices from "../(root)/(HomePage)/HomeServices";
-import HomeSlider from "../(root)/(HomePage)/HomeSlider";
+import HomeProjects from "@/app/(root)/(HomePage)/HomeProjects";
+import HomeServices from "@/app/(root)/(HomePage)/HomeServices";
+import HomeSlider from "@/app/(root)/(HomePage)/HomeSlider";
 import Footer from "@/components/main-layout/footer";
 import { getSiteSettings } from "@/lib/database/siteSettings";
 import { getAlbumBySlug } from "@/lib/database/album";
+// import AdminPageSettings from "./AdminPageSettings";
+
 
 export default async function AdminPage() {
   const siteSettings = await getSiteSettings({
     coverImageLimit: true,
     coverTextLimit: true,
+    serviceAlbumLimit: true,
+    projectAlbumLimit: true,
+    isRegistrationOpen: true,
   });
-  const { coverImageLimit = undefined, coverTextLimit = undefined } = siteSettings || {};
+  const {
+    coverImageLimit,
+    coverTextLimit,
+    // serviceAlbumLimit,
+    // projectAlbumLimit,
+    // isRegistrationOpen,
+  } = siteSettings || {};
 
   const coverAlbumData = await getAlbumBySlug("cover-album");
   const coverTexts = coverAlbumData?.content || {};
@@ -26,6 +37,12 @@ export default async function AdminPage() {
             coverTextLimit={coverTextLimit}
           />
         </SmoothLink>
+
+        {/* <AdminPageSettings
+        serviceAlbumLimit={serviceAlbumLimit}
+        projectAlbumLimit={projectAlbumLimit}
+        isRegistrationOpen={isRegistrationOpen} /> */}
+
         <HomeServices />
         <HomeProjects />
       </div>

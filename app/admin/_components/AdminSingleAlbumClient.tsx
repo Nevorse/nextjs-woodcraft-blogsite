@@ -14,7 +14,10 @@ import { updateImageOrders } from "@/lib/actions/db/image-actions";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 import Input from "@/components/ui/form/Input";
-import { BreadcrumbNav, getAlbumBreadcrumbs } from "@/components/ui/general/BreadcrumbNav";
+import {
+  BreadcrumbNav,
+  getAlbumBreadcrumbs,
+} from "@/components/ui/general/BreadcrumbNav";
 import { cn, normalize } from "@/lib/utils";
 import { isEqual } from "lodash";
 import { AlbumUpdateSafeInput, updateAlbumBySlug } from "@/lib/actions/db/album-actions";
@@ -80,12 +83,17 @@ export default function AdminSingleAlbumClient({
     }
   }, [albumParam, albumData.id]);
 
-  const processSave = async (
-    isTextsModified: boolean,
-    isTitleChanged: boolean,
-    albumDataToUpdate: AlbumUpdateSafeInput,
-    orderChanged: boolean,
-  ) => {
+  const processSave = async ({
+    isTextsModified,
+    isTitleChanged,
+    albumDataToUpdate,
+    orderChanged,
+  }: {
+    isTextsModified: boolean;
+    isTitleChanged: boolean;
+    albumDataToUpdate: AlbumUpdateSafeInput;
+    orderChanged: boolean;
+  }) => {
     if (orderChanged) {
       const result = await updateImageOrders({
         images: albumImagesState,
@@ -129,12 +137,12 @@ export default function AdminSingleAlbumClient({
       return;
     }
     try {
-      const promise = processSave(
+      const promise = processSave({
         isTextsModified,
         isTitleChanged,
         albumDataToUpdate,
         orderChanged,
-      );
+      });
       const res = await toast.promise(promise, {
         loading: "Değişiklikler kaydediliyor...",
         success: "Kaydedildi.",
@@ -161,7 +169,8 @@ export default function AdminSingleAlbumClient({
   return (
     <>
       <div className="flex justify-between gap-12">
-        <div className="w-full text-[28px] mb-8 font-semibold tracking-wider">
+        <div className="text-[28px] mb-8 font-semibold tracking-wider">
+          <span className="invisible block h-0 px-2">{titleState || " "}</span>
           <Input
             name="title"
             as="input"
@@ -180,14 +189,24 @@ export default function AdminSingleAlbumClient({
         <div className="flex flex-1 flex-col gap-4 xl:w-[80%]">
           <div className="mb-8 transition-all">
             <div className="relative 2xl:h-[75vh] xl:h-[60vh] lg:h-[65vh] md:h-[55vh] sm:h-[45vh] h-[40vh] w-full transition-all shadow-md">
+              {/* <div className="bg-transparent backdrop-blur-md h-full w-1/3 absolute z-10"></div> */}
+              {/* <div className="bg-transparent backdrop-blur-md h-full w-1/3 absolute z-10 right-0"></div> */}
               <Image
                 className="object-cover object-center"
                 src={getImagePath(albumImagesState[0]?.uuid)}
                 alt={albumData.title}
                 fill={true}
                 priority
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                sizes="100vw"
+                // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
+              {/* <Image
+                className="object-contain"
+                src={getImagePath(albumImagesState[0]?.uuid)}
+                alt={albumData.title}
+                fill={true}
+                priority
+              /> */}
             </div>
           </div>
 

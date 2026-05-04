@@ -1,26 +1,40 @@
 "use client";
 import { navItems, adminNavItems, navTitle, adminNavTitle } from "./navConsts";
-import Image, { StaticImageData } from "next/image";
 import { useEffect, useRef, useState } from "react";
-import SmoothLink from "../../ui/general/SmoothLink";
 import { CgClose } from "react-icons/cg";
 import { HiOutlineMenuAlt3 } from "react-icons/hi";
-import { usePathname, useRouter } from "next/navigation";
-import { signOutAction } from "@/lib/actions/auth-actions";
-import toast from "react-hot-toast";
+import { usePathname } from "next/navigation";
 import { useDynamicNavbar } from "@/hooks/useDynamicNavbar";
+import { NavbarLinks, NavbarTitle } from "./NavbarLinks";
+import { AnimatePresence, motion } from "motion/react";
 
-export default function Navbar() {
+export type UserType =
+  | {
+      id: string;
+      createdAt: Date;
+      updatedAt: Date;
+      email: string;
+      emailVerified: boolean;
+      name: string;
+      image?: string | null | undefined;
+    }
+  | null
+  | undefined;
+type NavbarProps = {
+  user?: UserType;
+  // authSlot?: React.ReactNode;
+};
+
+export default function Navbar({ user }: NavbarProps) {
   const [displayFixedNav, setDisplayFixedNav] = useState<boolean>(false);
   const [openMobileNavbar, setOpenMobileNavbar] = useState<boolean>(false);
   const { isCompact, contentRef, containerRef } = useDynamicNavbar();
   const mobileOutsideRef = useRef(null);
   const pathname = usePathname();
-  const router = useRouter();
 
-  const isAdmin = pathname.startsWith("/admin");
-  const currentNavTitle = isAdmin ? adminNavTitle : navTitle;
-  const currentNavItems = isAdmin ? adminNavItems : navItems;
+  const isOnAdminPage = pathname.startsWith("/admin");
+  const currentNavTitle = isOnAdminPage ? adminNavTitle : navTitle;
+  const currentNavItems = isOnAdminPage ? adminNavItems : navItems;
 
   if (!isCompact && openMobileNavbar) {
     setOpenMobileNavbar(false);
@@ -28,7 +42,8 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setDisplayFixedNav(window.scrollY > 90);
+      const shouldShow = window.scrollY > 90;
+      setDisplayFixedNav((prev) => (prev !== shouldShow ? shouldShow : prev));
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -37,23 +52,10 @@ export default function Navbar() {
     };
   }, []);
 
-  const handleLogout = async () => {
-    setOpenMobileNavbar(false);
-    const result = await signOutAction();
-    if (result.success === true) {
-      router.push("/");
-      toast.success("Çıkış yapıldı");
-    } else {
-      toast.error(`${result.error}`);
-    }
-  };
-
   return (
     <>
       {/* Static Navbar */}
-      <header className="flex justify-center mx-[4%]" 
-      ref={containerRef}
-      >
+      <header className="flex justify-center mx-[4%]" ref={containerRef}>
         <div
           className="flex whitespace-nowrap w-full max-w-375 items-center justify-between text-(--color-primary)"
           ref={contentRef}
@@ -70,47 +72,59 @@ export default function Navbar() {
               >
                 <HiOutlineMenuAlt3 className="w-7.25 h-7.25" />
               </button>
-              {openMobileNavbar && (
-                <div
-                  className="fixed inset-0 z-40"
-                  aria-label="outside"
-                  ref={mobileOutsideRef}
-                  onClick={(e) => {
-                    if (e.target === e.currentTarget) {
-                      setOpenMobileNavbar(false);
-                    }
-                  }}
-                >
-                  <div className="fixed top-0 right-0 max-w-92.5 pr-5 -mr-5 w-full h-full flex flex-col bg-black/40 backdrop-blur-lg">
-                    <div className="mr-[10%]">
-                      <div className="h-26.25 flex items-center justify-end">
-                        <button
-                          onClick={() => setOpenMobileNavbar(false)}
-                          className="p-2 rounded-full hover:bg-black/20 transition-colors"
-                        >
-                          <CgClose className="w-7.25 h-7.25 text-white" />
-                        </button>
-                      </div>
 
-                      <NavbarLinks
-                        currentNavItems={currentNavItems}
-                        className="flex-col items-end text-white"
-                        itemClassName="hover:bg-black/20! rounded-md!"
-                        onClick={() => setOpenMobileNavbar(false)}
-                        onLogout={handleLogout}
-                        isAdmin={isAdmin}
-                      />
-                    </div>
+              <AnimatePresence>
+                {openMobileNavbar && (
+                  <div
+                    className="fixed inset-0 z-40"
+                    aria-label="outside"
+                    ref={mobileOutsideRef}
+                    onClick={(e) => {
+                      // if (e.target === e.currentTarget) {
+                      if (mobileOutsideRef.current === e.target) {
+                        setOpenMobileNavbar(false);
+                      }
+                    }}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="fixed top-0 right-0 w-[55%] max-w-92.5 min-w-max pr-1 -mr-5 h-full flex flex-col bg-black/40 backdrop-blur-lg"
+                    >
+                      <div className="mr-[12%]">
+                        <div className="h-26.25 flex items-center justify-end">
+                          <button
+                            onClick={() => setOpenMobileNavbar(false)}
+                            className="p-2 rounded-full hover:bg-black/20 transition-colors"
+                          >
+                            <CgClose className="w-7.25 h-7.25 text-white" />
+                          </button>
+                        </div>
+
+                        <NavbarLinks
+                          currentNavItems={currentNavItems}
+                          className="flex-col items-end text-white"
+                          itemClassName="hover:bg-black/20! rounded-md!"
+                          closeMobileNavbar={() => setOpenMobileNavbar(false)}
+                          isOnAdminPage={isOnAdminPage}
+                          user={user}
+                          // authSlot={authSlot}
+                        />
+                      </div>
+                    </motion.div>
                   </div>
-                </div>
-              )}
+                )}
+              </AnimatePresence>
+
             </div> ////   <= Mobile Navbar
           ) : (
             <NavbarLinks
               currentNavItems={currentNavItems}
               className="opacity-0 compact:opacity-100"
-              onLogout={handleLogout}
-              isAdmin={isAdmin}
+              isOnAdminPage={isOnAdminPage}
+              user={user}
+              // authSlot={authSlot}
             />
           )}
         </div>
@@ -125,8 +139,9 @@ export default function Navbar() {
             <NavbarTitle currentNavTitle={currentNavTitle} />
             <NavbarLinks
               currentNavItems={currentNavItems}
-              onLogout={handleLogout}
-              isAdmin={isAdmin}
+              isOnAdminPage={isOnAdminPage}
+              user={user}
+              // authSlot={authSlot}
             />
           </div>
         </header>
@@ -134,56 +149,3 @@ export default function Navbar() {
     </>
   );
 }
-type NavTitleProps = {
-  currentNavTitle: { title: string; logo: StaticImageData };
-};
-const NavbarTitle = ({ currentNavTitle }: NavTitleProps) => (
-  <div className="flex items-center justify-center gap-7 h-26.25 shrink-0 p-1 text-2xl text-center content-center">
-    <SmoothLink href={"/"}>
-      <Image
-        src={currentNavTitle.logo}
-        height={90}
-        alt="logo"
-        className="object-cover object-center h-22.5 lg"
-      />
-    </SmoothLink>
-    <SmoothLink href={"/"}>{currentNavTitle.title}</SmoothLink>
-  </div>
-);
-type NavbarLinksProps = {
-  currentNavItems: { title: string; href: string }[];
-  className?: string;
-  itemClassName?: string;
-  onClick?: () => void;
-  onLogout?: () => Promise<void> | void;
-  isAdmin?: boolean;
-};
-const NavbarLinks = ({
-  currentNavItems,
-  className,
-  itemClassName,
-  onClick,
-  onLogout,
-  isAdmin,
-}: NavbarLinksProps) => (
-  <div className={`flex shrink gap-2 font-medium ${className}`}>
-    {currentNavItems.map((item, index) => (
-      <SmoothLink
-        key={index}
-        href={item.href}
-        onClick={onClick}
-        className={`px-4 py-2 rounded-xl transition-colors ${itemClassName}`}
-      >
-        {item.title}
-      </SmoothLink>
-    ))}
-    {isAdmin && (
-      <button
-        className={`px-4 py-2 rounded-xl transition-colors cursor-pointer ${itemClassName}`}
-        onClick={onLogout}
-      >
-        Çıkış
-      </button>
-    )}
-  </div>
-);

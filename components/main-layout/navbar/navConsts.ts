@@ -42,10 +42,6 @@ export const adminNavItems = [
     title: "Hizmetler",
     href: "/admin/services",
   },
-  {
-    title: "Siteye Dön",
-    href: "/home"
-  }
 ];
 export const adminNavTitle = {
   title: "Admin Page",

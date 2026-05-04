@@ -9,6 +9,7 @@ import {
   BreadcrumbNav,
   getAlbumBreadcrumbs,
 } from "@/components/ui/general/BreadcrumbNav";
+import { AnimatePresence, motion } from "motion/react";
 
 type SimpleAlbumData = {
   id: string;
@@ -24,6 +25,7 @@ type SingleAlbumClientProps = {
   otherAlbums: SimpleAlbumData[];
   pageType: "projects" | "services";
 };
+
 export default function SingleAlbumClient({
   albumData,
   albumParam,
@@ -57,14 +59,16 @@ export default function SingleAlbumClient({
 
   return (
     <>
-      {albumData.images && albumData.images.length > 0 && selectedIndex !== null && (
-        <SingleAlbumModal
-          data={albumData.images}
-          startIndex={selectedIndex}
-          onClose={() => setSelectedIndex(null)}
-          alt={albumData.title}
-        />
-      )}
+      <AnimatePresence>
+          {albumData.images && albumData.images.length > 0 && selectedIndex !== null && (
+            <SingleAlbumModal
+              data={albumData.images}
+              startIndex={selectedIndex}
+              onClose={() => setSelectedIndex(null)}
+              alt={albumData.title}
+            />
+          )}
+      </AnimatePresence>
 
       <div className="flex justify-between">
         <div
@@ -81,20 +85,24 @@ export default function SingleAlbumClient({
 
       <div className="flex flex-col lg:flex-row gap-y-8 gap-x-6">
         <div className="flex flex-1 flex-col gap-4 xl:w-[80%]">
-          <div className="mb-8 transition-all">
-            <div
-              onClick={() => setSelectedIndex(0)}
-              className="relative 2xl:h-[75vh] xl:h-[60vh] lg:h-[65vh] md:h-[55vh] sm:h-[45vh] h-[40vh] w-full transition-all shadow-md cursor-pointer"
-            >
-              <Image
-                className="object-cover object-center"
-                src={getImagePath(albumData.images[0]?.uuid)}
-                alt={albumData.title}
-                fill={true}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="mb-8">
+              <div
+                onClick={() => setSelectedIndex(0)}
+                className="relative 2xl:h-[75vh] xl:h-[60vh] lg:h-[65vh] md:h-[55vh] sm:h-[45vh] h-[40vh] w-full shadow-md cursor-pointer"
+              >
+                <Image
+                  className="object-cover object-center"
+                  src={getImagePath(albumData.images[0]?.uuid)}
+                  alt={albumData.title}
+                  fill={true}
+                  priority
+                  sizes="100vw"
+                  // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              </div>
             </div>
-          </div>
+          </motion.div>
 
           <div className="text-[18px]">
             <p className="whitespace-pre-wrap overflow-hidden text">

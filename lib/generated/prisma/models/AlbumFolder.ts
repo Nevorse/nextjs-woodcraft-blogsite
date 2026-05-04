@@ -213,7 +213,7 @@ export type AlbumFolderGroupByOutputType = {
   _max: AlbumFolderMaxAggregateOutputType | null
 }
 
-type GetAlbumFolderGroupByPayload<T extends AlbumFolderGroupByArgs> = Prisma.PrismaPromise<
+export type GetAlbumFolderGroupByPayload<T extends AlbumFolderGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<AlbumFolderGroupByOutputType, T['by']> &
       {
@@ -1329,6 +1329,11 @@ export type AlbumFolderFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Skip the first `n` AlbumFolders.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of AlbumFolders.
+   */
   distinct?: Prisma.AlbumFolderScalarFieldEnum | Prisma.AlbumFolderScalarFieldEnum[]
 }
 

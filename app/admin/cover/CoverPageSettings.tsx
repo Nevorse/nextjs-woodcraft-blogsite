@@ -32,7 +32,7 @@ export default function CoverPageSettings({
   return (
     <div className="grid gap-12 mt-12">
       <div className="flex flex-wrap justify-center gap-x-10">
-        <div className="flex flex-col justify-center items-centergap-2 bg-(--theme-tertiary)/40 p-4 rounded-lg">
+        <div className="flex flex-col justify-center items-center gap-2 bg-(--theme-tertiary)/40 p-4 rounded-lg">
           <span>Kapak Fotoğrafı Limiti</span>
           <AdminSelector
             defaultValue={coverImageLimit.state}

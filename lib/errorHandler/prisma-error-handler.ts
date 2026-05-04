@@ -26,12 +26,12 @@ function getErrorMessageForDb(error: unknown): string {
     return messages[code] || "Veritabanı hatası.";
   }
   // Validation hatası
-  if (error instanceof Prisma.PrismaClientValidationError) {
+  else if (error instanceof Prisma.PrismaClientValidationError) {
     return "Geçersiz veri formatı.";
   }
 
   // Normal hata
-  if (error instanceof Error) {
+  else if (error instanceof Error) {
     return error.message;
   }
 

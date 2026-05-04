@@ -1,9 +1,16 @@
 import CardComponent from "@/components/ui/cards/CardComponent";
 import { getFoldersByType } from "@/lib/database/albumFolder";
+import { getSiteSettings } from "@/lib/database/siteSettings";
 import { FolderType } from "@/lib/generated/prisma/enums";
 
 export default async function HomeProjects() {
-  const foldersData = await getFoldersByType(FolderType.PROJECT_FOLDER);
+  const siteSettings = await getSiteSettings({ projectAlbumLimit: true });
+  const { projectAlbumLimit = 6 } = siteSettings || {};
+
+  const foldersData = await getFoldersByType({
+    type: FolderType.PROJECT_FOLDER,
+    take: projectAlbumLimit,
+  });
 
   if (!foldersData) return;
 
@@ -17,7 +24,7 @@ export default async function HomeProjects() {
       </div>
 
       <div className="flex w-[92.5%] gap-x-4 gap-y-20 justify-center flex-wrap">
-        {foldersData.slice(0, 6).map((project, index) => (
+        {foldersData.map((project, index) => (
           <CardComponent
             key={index}
             title={project.title}

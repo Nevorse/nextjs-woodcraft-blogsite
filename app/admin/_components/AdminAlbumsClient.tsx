@@ -2,7 +2,7 @@
 import AdminComponentCard from "@/components/ui/admin/AdminComponentCard";
 import DndSortableGrid from "@/components/ui/admin/DndSortableGrid";
 import SubmitButton from "@/components/ui/form/SubmitButton";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   createAlbumForFolder,
@@ -14,9 +14,12 @@ import { hasOrderChanged } from "@/lib/helpers/albumHelpers";
 import { getErrorMessage } from "@/lib/helpers/error-helpers";
 import {
   createAlbumFolder,
+  updateAlbumFolderById,
   updateFolderOrders,
 } from "@/lib/actions/db/albumFolder-actions";
 import ImageDropzone from "@/components/image-dropzone/ImageDropzone";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import Input from "@/components/ui/form/Input";
 
 type AdminItemData = {
   id: string;
@@ -36,11 +39,13 @@ type AdminAlbumsClientProps = {
       mode: "folders" | "albums";
       folderId?: undefined;
       thisComponentsImage?: undefined;
+      folderTitle?: undefined;
     }
   | {
       mode: "albumsInFolder";
       folderId: string;
       thisComponentsImage: string | undefined | null;
+      folderTitle: string;
     }
 );
 export default function AdminAlbumsClient({
@@ -49,6 +54,7 @@ export default function AdminAlbumsClient({
   mode,
   folderId,
   thisComponentsImage,
+  folderTitle,
 }: AdminAlbumsClientProps) {
   const getImageUuid = (item: AdminItemData, mode: string) => {
     if (mode === "folders") {
@@ -61,18 +67,21 @@ export default function AdminAlbumsClient({
     computedImageHref: getImageUuid(item, mode),
   }));
 
+  const [titleState, setTitleState] = useState(folderTitle);
   const [itemsDataState, setItemsDataState] = useState(processedItems);
   const [openDropzone, setOpenDropzone] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { confirm, ConfirmDialog } = useConfirmDialog();
 
   const createNewAlbum = async () => {
     const createAlbum =
       mode === "folders" && pageType === "projects"
-        ? createAlbumFolder({ type: pageType, pathToRevalidate: pathname })
+        ? createAlbumFolder({ type: pageType})
         : mode === "albumsInFolder"
-          ? createAlbumForFolder({ folderId, type: pageType, pathToRevalidate: pathname })
+          ? createAlbumForFolder({ folderId, type: pageType})
           : mode === "albums"
-            ? createStandaloneAlbum({ type: pageType, pathToRevalidate: pathname })
+            ? createStandaloneAlbum({ type: pageType })
             : undefined;
     if (!createAlbum) {
       toast.error("Servisler için klasör özelliği açılmadı");
@@ -88,33 +97,58 @@ export default function AdminAlbumsClient({
     }
   };
 
-  const processSave = async () => {
-    const updateOrder =
-      mode === "folders"
-        ? updateFolderOrders({ folders: itemsDataState, pathToRevalidate: pathname })
-        : updateAlbumOrders({ albums: itemsDataState, pathToRevalidate: pathname });
+  const processSave = async ({
+    isTitleChanged,
+    orderChanged,
+  }: {
+    isTitleChanged: boolean;
+    orderChanged: boolean;
+  }) => {
+    if (orderChanged) {
+      const updateOrder =
+        mode === "folders"
+          ? updateFolderOrders({ folders: itemsDataState })
+          : updateAlbumOrders({ albums: itemsDataState});
 
-    const result = await updateOrder;
-
-    if (!result.success) {
-      throw new Error(result.error);
+      const result = await updateOrder;
+      if (!result.success) {
+        throw new Error(result.error);
+      }
     }
-    return result;
+
+    if (isTitleChanged) {
+      if (!folderId) return { success: false, error: "ID Okuma Başarısız" };
+
+      const result = await updateAlbumFolderById({
+        id: folderId,
+        data: { title: titleState },
+      });
+      if (!result.success) throw new Error(result.error);
+      return { success: true, newSlug: result.newSlug };
+    }
+
+    return { success: true, newSlug: undefined };
   };
 
   const handleSave = async () => {
+    const isTitleChanged = titleState !== folderTitle;
     const orderChanged = hasOrderChanged(itemsDataState, itemsData);
-    if (!orderChanged) {
+
+    const isAnythingChanged = isTitleChanged || orderChanged;
+    if (!isAnythingChanged) {
       toast.error("Değişiklik yapılmadı");
       return;
     }
     try {
-      const promise = processSave();
-      await toast.promise(promise, {
+      const promise = processSave({ isTitleChanged, orderChanged });
+      const res = await toast.promise(promise, {
         loading: "Değişiklikler kaydediliyor...",
         success: "Kaydedildi.",
         error: (err) => `Bir hata oluştu: ${err.message}`,
       });
+
+      if (res.newSlug) router.push(res.newSlug);
+      else router.refresh();
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error(error, errorMessage);
@@ -131,7 +165,7 @@ export default function AdminAlbumsClient({
       method: "DELETE",
       body: JSON.stringify({ files: [thisComponentsImage] }),
     });
-    
+
     const responseData = await res.json();
 
     if (!res.ok) {
@@ -148,6 +182,26 @@ export default function AdminAlbumsClient({
 
   return (
     <>
+      <ConfirmDialog />
+
+      {mode === "albumsInFolder" ? (
+        <div className="text-3xl font-bold tracking-wider mb-4 text-center text-(--color-primary)">
+          <span className="invisible block h-0 px-2">{titleState || " "}</span>
+          <Input
+            name="title"
+            as="input"
+            focusOutline
+            value={titleState}
+            onChange={(e) => setTitleState(e.currentTarget.value)}
+            className="text-center truncate p-0! border-0! shadow-none!"
+          />
+        </div>
+      ) : (
+        <h1 className="text-3xl font-bold tracking-wider mb-4 text-center text-(--color-primary)">
+          {pageType === "projects" ? "Projelerimiz" : "Hizmetlerimiz"}
+        </h1>
+      )}
+
       <div className="flex gap-10">
         <SubmitButton
           onClick={createNewAlbum}
@@ -175,7 +229,11 @@ export default function AdminAlbumsClient({
             xType="projects"
             isMultiple={false}
             isFolderImage={mode === "albumsInFolder" ? true : false}
-            deleteOldImage={mode === "albumsInFolder" && thisComponentsImage ? handleDeleteOldImage : undefined}
+            deleteOldImage={
+              mode === "albumsInFolder" && thisComponentsImage
+                ? handleDeleteOldImage
+                : undefined
+            }
           />
         </div>
       )}
@@ -197,6 +255,7 @@ export default function AdminAlbumsClient({
           {itemsDataState.map((item) => (
             <AdminComponentCard
               key={item.id}
+              confirm={confirm}
               itemId={item.id}
               itemHref={`${pathname}/${item.slug}`}
               itemTitle={item.title}

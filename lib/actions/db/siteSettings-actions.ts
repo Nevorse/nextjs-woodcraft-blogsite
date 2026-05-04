@@ -1,7 +1,7 @@
 "use server";
 import { handleDbActionError } from "@/lib/errorHandler/prisma-error-handler";
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
 const SettingsSchema = z
@@ -53,6 +53,9 @@ export async function upsertSiteSettings({
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
+
+    revalidateTag("site-settings", { expire: 0 });
+
     return { success: true };
   } catch (error) {
     return handleDbActionError(error, "updateSiteSettings");

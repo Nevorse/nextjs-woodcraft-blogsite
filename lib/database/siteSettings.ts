@@ -1,4 +1,6 @@
+"use cache";
 import prisma from "@/lib/prisma";
+import { cacheLife, cacheTag } from "next/cache";
 
 type GetSiteSettingsParams = {
   serviceAlbumLimit?: boolean;
@@ -8,8 +10,11 @@ type GetSiteSettingsParams = {
   isRegistrationOpen?: boolean;
 };
 
-export function getSiteSettings(params?: GetSiteSettingsParams) {
-  return prisma.siteSettings.findUnique({
+export async function getSiteSettings(params?: GetSiteSettingsParams) {
+  cacheTag("site-settings");
+  cacheLife("hours");
+
+  const siteSettings = await prisma.siteSettings.findUnique({
     where: { id: "SITE_SETTINGS_ID" },
     select: {
       serviceAlbumLimit: params?.serviceAlbumLimit ?? false,
@@ -19,4 +24,6 @@ export function getSiteSettings(params?: GetSiteSettingsParams) {
       isRegistrationOpen: params?.isRegistrationOpen ?? false,
     },
   });
+
+  return siteSettings;
 }

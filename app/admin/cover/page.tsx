@@ -16,7 +16,7 @@ export default async function AdminCoverPage() {
   const coverAlbumData = await getAlbumBySlug("cover-album");
   const coverTexts = coverAlbumData?.content || {};
 
-  if (!coverAlbumData) {
+  if (coverAlbumData === null) {
     const res = await createStandaloneAlbum({
       type: "cover",
       title: "Cover Album",

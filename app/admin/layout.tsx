@@ -1,27 +1,14 @@
-import { Toaster } from "react-hot-toast";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import Navbar from "@/components/main-layout/navbar";
+import { Suspense } from "react";
+import AdminLayoutInner from "./AdminLayoutInner";
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    redirect("/auth");
-  }
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <div className="min-h-svh flex flex-col bg-(--theme-primary)">
-        <Navbar />
-        <Toaster position="top-right" />
-        {children}
-      </div>
-    </>
+    <Suspense
+      fallback={
+        <div className="bg-(--theme-primary) w-lvh h-lvh" />
+      }
+    >
+      <AdminLayoutInner>{children}</AdminLayoutInner>
+    </Suspense>
   );
 }

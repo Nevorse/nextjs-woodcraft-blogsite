@@ -2,7 +2,7 @@
 import prisma from "@/lib/prisma";
 import slugify from "slugify";
 import { handleDbActionError } from "@/lib/errorHandler/prisma-error-handler";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import z from "zod";
 import { AlbumUpdateInput } from "@/lib/generated/prisma/models";
 import { generateIncrementalTitle } from "@/lib/utils";
@@ -64,6 +64,9 @@ export async function updateAlbumBySlug({
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
+
+    revalidateTag(`album-${result.id}`, "max");
+
     return {
       success: true,
       newSlug: result.slug,
@@ -101,6 +104,9 @@ export async function updateAlbumOrders({
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
+
+    revalidateTag("albums", "max");
+
     return { success: true };
   } catch (error) {
     return handleDbActionError(error, "updateAlbumOrders");
@@ -180,6 +186,9 @@ export async function createAlbumForFolder({
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
+
+    revalidateTag("albums", "max");
+
     return { success: true };
   } catch (error) {
     return handleDbActionError(error, "createAlbumForFolder");
@@ -250,6 +259,9 @@ export async function createStandaloneAlbum({
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
+
+    revalidateTag("albums", "max");
+
     return { success: true };
   } catch (error) {
     return handleDbActionError(error, "createStandaloneAlbum");
@@ -278,13 +290,13 @@ export async function deleteAlbumById({
       revalidatePath(pathToRevalidate);
     }
 
+    revalidateTag("albums", "max");
+
     return { success: true, id: result.id, title: result.title };
   } catch (error) {
     return handleDbActionError(error, "deleteAlbumById");
   }
 }
-
-
 
 // export async function upsertAlbumByID({
 //   id,

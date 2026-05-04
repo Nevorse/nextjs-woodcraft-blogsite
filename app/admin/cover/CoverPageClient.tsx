@@ -36,19 +36,22 @@ export default function CoverPageClient({
   const [coverImageLimitState, setCoverImageLimitState] =
     useState(initialCoverImageLimit);
   const [coverTextLimitState, setCoverTextLimitState] = useState(initialCoverTextLimit);
-  const [coverTextValues, setCoverTextValues] =
-    useState<ContentTextValues>(initialCoverTexts);
-
+  const [coverTextValues, setCoverTextValues] = useState(initialCoverTexts);
   const [coverImagesState, setCoverImagesState] = useState(coverAlbumImages);
   const [imageErrors, setImageErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
-  const processSave = async (
-    isLimitsChanged: boolean,
-    limitDataToUpdate: UpsertSiteSettingsParams,
-    isTextsModified: boolean,
-    orderChanged: boolean,
-  ) => {
+  const processSave = async ({
+    isLimitsChanged,
+    limitDataToUpdate,
+    isTextsModified,
+    orderChanged,
+  }: {
+    isLimitsChanged: boolean;
+    limitDataToUpdate: UpsertSiteSettingsParams;
+    isTextsModified: boolean;
+    orderChanged: boolean;
+  }) => {
     if (isLimitsChanged) {
       const result = await upsertSiteSettings({ data: limitDataToUpdate });
       if (!result.success) {
@@ -59,9 +62,9 @@ export default function CoverPageClient({
     if (isTextsModified) {
       const result = await updateAlbumBySlug({
         slug: "cover-album",
-        data: { 
-          content: coverTextValues
-         },
+        data: {
+          content: coverTextValues,
+        },
       });
       if (!result.success) {
         throw new Error(result.error);
@@ -104,12 +107,12 @@ export default function CoverPageClient({
       return;
     }
     try {
-      const promise = processSave(
+      const promise = processSave({
         isLimitsChanged,
         limitDataToUpdate,
         isTextsModified,
         orderChanged,
-      );
+      });
       await toast.promise(promise, {
         loading: "Değişiklikler kaydediliyor...",
         success: "Kaydedildi.",

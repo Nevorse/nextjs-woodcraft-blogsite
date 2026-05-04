@@ -31,7 +31,7 @@ export default function HomeSlider({
     const slideInterval = setInterval(() => {
       setImageIndex((prev) => (prev + 1) % imageLimit);
       setTextIndex((prev) => (prev + 1) % coverTextLimit);
-    }, 6000);
+    }, 8500);
     return () => {
       clearInterval(slideInterval);
     };

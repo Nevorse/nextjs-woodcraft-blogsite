@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react';
 type WindowSize = {
   width: number | undefined;
   height: number | undefined;
-  isCompact: boolean;
+  // isCompact: boolean;
 }
 
 export function useWindowSize(): WindowSize {
   const [windowSize, setWindowSize] = useState<WindowSize>({
     width: undefined,
     height: undefined,
-    isCompact: false,
+    // isCompact: false,
   });
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export function useWindowSize(): WindowSize {
       setWindowSize({
         width: width,
         height: height,
-        isCompact: width <= 948
+        // isCompact: width <= 948
       });
     }
     handleResize();

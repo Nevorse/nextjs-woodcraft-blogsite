@@ -1,10 +1,15 @@
 import { getAlbumsByType } from "@/lib/database/album";
-import HomeServicesSlider from "./HomeServicesSlider";
+import HomeServicesSlider, { HomeServicesSliderSkeleton } from "./HomeServicesSlider";
 import { AlbumType } from "@/lib/generated/prisma/enums";
+import { getSiteSettings } from "@/lib/database/siteSettings";
+import { Suspense } from "react";
 
-const albumsData = await getAlbumsByType(AlbumType.SERVICE_ALBUM);
+const siteSettings = await getSiteSettings({ serviceAlbumLimit: true });
 
-console.log(albumsData);
+const albumsData = await getAlbumsByType({
+  type: AlbumType.SERVICE_ALBUM,
+  take: siteSettings?.serviceAlbumLimit,
+});
 
 export default function HomeServices() {
   return (
@@ -15,7 +20,9 @@ export default function HomeServices() {
         </div>
         <div className="w-36 h-px bg-(--color-primary)"></div>
       </div>
-      <HomeServicesSlider slideData={albumsData} />
+      <Suspense fallback={<HomeServicesSliderSkeleton />}>
+        <HomeServicesSlider slideData={albumsData} />
+      </Suspense>
     </div>
   );
 }

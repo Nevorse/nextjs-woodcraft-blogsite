@@ -6,6 +6,7 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useEffect, useRef, useState } from "react";
 import { GoDotFill } from "react-icons/go";
 import { getImagePath } from "@/lib/helpers/imageHelpers";
+import { motion } from "motion/react";
 
 export default function SingleAlbumModal({
   data,
@@ -13,7 +14,7 @@ export default function SingleAlbumModal({
   alt,
   onClose,
 }: {
-  data: { uuid: string; id: string, order: number }[];
+  data: { uuid: string; id: string; order: number }[];
   startIndex: number;
   onClose: () => void;
   alt?: string;
@@ -53,13 +54,17 @@ export default function SingleAlbumModal({
       if (e.key === "ArrowRight") handleIndexChange("next");
       if (e.key === "ArrowLeft") handleIndexChange("prev");
       if (e.key === "Escape") onClose();
+      if (e.key === "Backspace") onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentIndex]); // react to currentIndex changes
+  }, [currentIndex]);
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       ref={modalRef}
       id="modal-overlay"
       onClick={(e) => handleOutsideClick(e)}
@@ -93,19 +98,17 @@ export default function SingleAlbumModal({
           {currentIndex < data.length - 1 && (
             <Image
               src={getImagePath(data[currentIndex + 1]?.uuid)}
-              priority
-              width={10}
-              height={10}
-              alt=""
+              width={0}
+              height={0}
+              alt="nextImage"
             />
           )}
           {currentIndex > 0 && (
             <Image
               src={getImagePath(data[currentIndex - 1]?.uuid)}
-              priority
-              width={10}
-              height={10}
-              alt=""
+              width={0}
+              height={0}
+              alt="prevImage"
             />
           )}
         </div>
@@ -126,16 +129,13 @@ export default function SingleAlbumModal({
               type="button"
               aria-label={`${index + 1}. Resme Git`}
               className={`hover:scale-125 transition-all relative before:rounded-full before:absolute before:inset-0 before:-z-10 before:hover:blur-sm before:hover:bg-white
-              ${
-                index === currentIndex &&
-                "scale-110 before:blur-xs before:bg-white/75"
-              }`}
+              ${index === currentIndex && "scale-110 before:blur-xs before:bg-white/75"}`}
             >
               <GoDotFill className="rounded-full w-5 h-5 xl:w-6 xl:h-6 shadow-2xl shadow-black" />
             </button>
           ))
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

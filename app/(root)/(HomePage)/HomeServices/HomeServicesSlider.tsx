@@ -47,7 +47,7 @@ export default function HomeServicesSlider({
     <Swiper
       modules={[Autoplay]}
       autoplay={{
-        delay: 5000,
+        delay: 4000,
         disableOnInteraction: false,
         pauseOnMouseEnter: true,
       }}
@@ -61,11 +61,11 @@ export default function HomeServicesSlider({
       className="w-[92%] mx-auto"
     >
       {slideData.map((item, index) => (
-        <SwiperSlide key={index} className="group">
-          <div className="flex flex-col items-center justify-center m-8">
+        <SwiperSlide key={index}>
+          <div className="flex flex-col items-center justify-center m-8 group">
             <SmoothLink
               href={`/services/${item.slug}`}
-              className="relative block overflow-hidden w-full h-[240px] lg:h-[320px] mb-4 transition-all hover:shadow-xl cursor-pointer"
+              className="relative block overflow-hidden w-full h-[240px] lg:h-[320px] mb-4 cursor-pointer group-hover:shadow-xl transition-shadow"
             >
               <Image
                 src={getImagePath(item.images?.[0]?.uuid)}
@@ -84,5 +84,24 @@ export default function HomeServicesSlider({
         </SwiperSlide>
       ))}
     </Swiper>
+  );
+}
+
+export function HomeServicesSliderSkeleton() {
+  return (
+    <div className="w-[92%] mx-auto flex">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className={`flex flex-col items-center justify-center m-8 w-full
+            ${i === 2 ? "hidden min-[700px]:flex" : ""}
+            ${i === 3 ? "hidden min-[1280px]:flex" : ""}
+          `}
+        >
+          <div className="w-full h-[240px] lg:h-[320px] mb-4 bg-(--theme-tertiary)/30 animate-pulse" />
+          <div className="h-6 w-32 bg-(--theme-tertiary)/30 animate-pulse rounded" />
+        </div>
+      ))}
+    </div>
   );
 }

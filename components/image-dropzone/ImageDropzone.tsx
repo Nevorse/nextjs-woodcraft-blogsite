@@ -214,12 +214,10 @@ export default function ImageDropzone({
       ? saveImagesToAlbum({
           paths: bucketResult.successPaths,
           albumId: parentId,
-          pathToRevalidate: pathname,
         })
       : saveImageToFolder({
           path: bucketResult.successPaths[0],
           folderId: parentId,
-          pathToRevalidate: pathname,
         });
 
     const dbResult = await dbAction;

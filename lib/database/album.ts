@@ -1,6 +1,8 @@
+"use cache";
 import prisma from "@/lib/prisma";
 import { AlbumGetPayload } from "../generated/prisma/models";
 import { AlbumType } from "../generated/prisma/enums";
+import { cacheLife, cacheTag } from "next/cache";
 
 export type AlbumWithRelations = AlbumGetPayload<{
   include: {
@@ -24,12 +26,21 @@ export type AlbumWithContent = Omit<AlbumWithRelations, "content"> & {
   content: ContentTextValues | null;
 };
 
-export async function getAlbumsByType(
-  type: AlbumType,
-): Promise<AlbumWithRelations[]> {
+export async function getAlbumsByType({
+  type,
+  take,
+}: {
+  type: AlbumType;
+  take?: number;
+}): Promise<AlbumWithRelations[]> {
+  cacheTag("albums", `albums-${type}`);
+  cacheLife("hours");
+
+
   return prisma.album.findMany({
     where: { type },
     orderBy: { order: "desc" },
+    take: take || undefined,
     include: {
       images: {
         select: {
@@ -44,6 +55,7 @@ export async function getAlbumsByType(
     },
   });
 }
+
 export async function getAlbumBySlug(slug: string): Promise<AlbumWithContent | null> {
   const album = await prisma.album.findUnique({
     where: {
@@ -65,6 +77,9 @@ export async function getAlbumBySlug(slug: string): Promise<AlbumWithContent | n
   });
 
   if (!album) return null;
+
+  cacheTag("albums", `album-${album.id}`);
+  cacheLife("hours");
 
   return {
     ...album,

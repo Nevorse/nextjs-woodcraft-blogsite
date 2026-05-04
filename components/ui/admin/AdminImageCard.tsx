@@ -67,7 +67,6 @@ export default function AdminImageCard({
     }
     const dbResult = await removeImagesFromAlbum({
       paths: bucketResult.successPaths,
-      pathToRevalidate: pathname,
     });
     if (!dbResult.success) {
       throw new Error(dbResult.error);
