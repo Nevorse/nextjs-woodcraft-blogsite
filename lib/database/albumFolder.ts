@@ -1,4 +1,3 @@
-"use cache";
 import prisma from "@/lib/prisma";
 import { AlbumFolderGetPayload } from "../generated/prisma/models";
 import { FolderType } from "../generated/prisma/enums";
@@ -37,9 +36,9 @@ export async function getFoldersByType({
   type: FolderType;
   take?: number;
 }): Promise<AlbumFolderType[]> {
+  "use cache";
   cacheTag("folders", `folders-${type}`);
   cacheLife("hours");
-
 
   return prisma.albumFolder.findMany({
     where: { type },
@@ -56,6 +55,7 @@ export async function getFoldersByType({
 export async function getFolderBySlug(
   slug: string,
 ): Promise<FolderWithAlbumsType | null> {
+  "use cache";
   const folder = await prisma.albumFolder.findUnique({
     where: {
       slug: slug,

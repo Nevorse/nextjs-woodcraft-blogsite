@@ -1,4 +1,3 @@
-"use cache";
 import prisma from "@/lib/prisma";
 import { cacheLife, cacheTag } from "next/cache";
 
@@ -11,6 +10,7 @@ type GetSiteSettingsParams = {
 };
 
 export async function getSiteSettings(params?: GetSiteSettingsParams) {
+  "use cache";
   cacheTag("site-settings");
   cacheLife("hours");
 
