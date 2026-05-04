@@ -1,17 +1,17 @@
 import { getAlbumsByType } from "@/lib/database/album";
-import HomeServicesSlider, { HomeServicesSliderSkeleton } from "./HomeServicesSlider";
+import HomeServicesSlider from "./HomeServicesSlider";
 import { AlbumType } from "@/lib/generated/prisma/enums";
 import { getSiteSettings } from "@/lib/database/siteSettings";
 import { Suspense } from "react";
+import HomeServicesSliderSkeleton from "./HomeServicesSkeleton";
 
-const siteSettings = await getSiteSettings({ serviceAlbumLimit: true });
+export default async function HomeServices() {
+  const siteSettings = await getSiteSettings({ serviceAlbumLimit: true });
 
-const albumsData = await getAlbumsByType({
-  type: AlbumType.SERVICE_ALBUM,
-  take: siteSettings?.serviceAlbumLimit,
-});
-
-export default function HomeServices() {
+  const albumsData = await getAlbumsByType({
+    type: AlbumType.SERVICE_ALBUM,
+    take: siteSettings?.serviceAlbumLimit,
+  });
   return (
     <div className="w-full mt-36 pb-10">
       <div className="flex flex-col items-center mb-2">
