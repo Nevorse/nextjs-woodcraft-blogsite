@@ -8,10 +8,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-svh flex flex-col bg-(--theme-primary) overflow-x-hidden">
 
-      {/* <Suspense fallback={<NavbarSkeleton />}>
+      <Suspense fallback={<NavbarSkeleton />}>
         <NavbarWrapper />
-      </Suspense> */}
-      <NavbarSkeleton />
+      </Suspense>
+      {/* <NavbarSkeleton /> */}
       
       <Toaster position="top-right" />
       {children}

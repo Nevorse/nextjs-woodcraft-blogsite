@@ -72,7 +72,7 @@ export default function HomeServicesSlider({
                 alt={item.title}
                 className="object-center object-cover"
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                sizes="(max-width: 700px) 100vw, (max-width: 1280px) 50vw, 33vw"
               />
             </SmoothLink>
             <SmoothLink href={`/services/${item.slug}`}>
