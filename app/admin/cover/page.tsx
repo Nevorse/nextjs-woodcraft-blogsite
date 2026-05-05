@@ -7,13 +7,15 @@ import { createStandaloneAlbum } from "@/lib/actions/db/album-actions";
 import CoverAlbumCreator from "./CoverAlbumCreator";
 
 export default async function AdminCoverPage() {
-  const siteSettings = await getSiteSettings({
-    coverImageLimit: true,
-    coverTextLimit: true,
-  });
-  const { coverImageLimit = undefined, coverTextLimit = undefined } = siteSettings || {};
+  const [siteSettings, coverAlbumData] = await Promise.all([
+    getSiteSettings({
+      coverImageLimit: true,
+      coverTextLimit: true,
+    }),
+    getAlbumBySlug("cover-album"),
+  ]);
 
-  const coverAlbumData = await getAlbumBySlug("cover-album");
+  const { coverImageLimit = undefined, coverTextLimit = undefined } = siteSettings || {};
   const coverTexts = coverAlbumData?.content || {};
 
   if (coverAlbumData === null) {

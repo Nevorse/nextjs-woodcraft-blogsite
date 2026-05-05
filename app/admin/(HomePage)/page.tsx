@@ -7,15 +7,18 @@ import { getSiteSettings } from "@/lib/database/siteSettings";
 import { getAlbumBySlug } from "@/lib/database/album";
 // import AdminPageSettings from "./AdminPageSettings";
 
-
 export default async function AdminPage() {
-  const siteSettings = await getSiteSettings({
-    coverImageLimit: true,
-    coverTextLimit: true,
-    serviceAlbumLimit: true,
-    projectAlbumLimit: true,
-    isRegistrationOpen: true,
-  });
+  const [siteSettings, coverAlbumData] = await Promise.all([
+    getSiteSettings({
+      coverImageLimit: true,
+      coverTextLimit: true,
+      // serviceAlbumLimit: true,
+      // projectAlbumLimit: true,
+      // isRegistrationOpen: true,
+    }),
+    getAlbumBySlug("cover-album"),
+  ]);
+
   const {
     coverImageLimit,
     coverTextLimit,
@@ -23,9 +26,8 @@ export default async function AdminPage() {
     // projectAlbumLimit,
     // isRegistrationOpen,
   } = siteSettings || {};
-
-  const coverAlbumData = await getAlbumBySlug("cover-album");
   const coverTexts = coverAlbumData?.content || {};
+
   return (
     <>
       <div className="w-[92%] min-h-[90vh] mx-auto text-center color-white">

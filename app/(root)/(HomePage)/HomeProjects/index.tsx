@@ -6,7 +6,6 @@ import { FolderType } from "@/lib/generated/prisma/enums";
 export default async function HomeProjects() {
   const siteSettings = await getSiteSettings({ projectAlbumLimit: true });
   const { projectAlbumLimit = 6 } = siteSettings || {};
-
   const foldersData = await getFoldersByType({
     type: FolderType.PROJECT_FOLDER,
     take: projectAlbumLimit,

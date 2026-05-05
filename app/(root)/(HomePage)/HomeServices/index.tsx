@@ -12,6 +12,7 @@ export default async function HomeServices() {
     type: AlbumType.SERVICE_ALBUM,
     take: siteSettings?.serviceAlbumLimit,
   });
+  
   return (
     <div className="w-full mt-36 pb-10">
       <div className="flex flex-col items-center mb-2">

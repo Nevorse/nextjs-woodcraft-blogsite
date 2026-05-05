@@ -10,8 +10,6 @@ async function fetchSession(token: string) {
   const headers = new Headers();
   const isSecure = process.env.NODE_ENV === "production";
 
-  console.log("isSecure:",isSecure);
-
   const cookieName = isSecure
     ? "__Secure-better-auth.session_token"
     : "better-auth.session_token";
