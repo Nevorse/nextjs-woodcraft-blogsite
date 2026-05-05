@@ -8,13 +8,23 @@ async function fetchSession(token: string) {
   cacheLife("hours");
 
   const headers = new Headers();
-  headers.set("cookie", `better-auth.session_token=${token}`);
+  const isSecure = process.env.NODE_ENV === "production";
+
+  console.log("isSecure:",isSecure);
+
+  const cookieName = isSecure
+    ? "__Secure-better-auth.session_token"
+    : "better-auth.session_token";
+
+  headers.set("cookie", `${cookieName}=${token}`);
   return auth.api.getSession({ headers });
 }
 
 export async function getSession() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("better-auth.session_token")?.value;
+  const token =
+    cookieStore.get("__Secure-better-auth.session_token")?.value ??
+    cookieStore.get("better-auth.session_token")?.value;
 
   if (!token) return null;
 
