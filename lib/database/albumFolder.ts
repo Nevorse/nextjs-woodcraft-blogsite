@@ -56,6 +56,9 @@ export async function getFolderBySlug(
   slug: string,
 ): Promise<FolderWithAlbumsType | null> {
   "use cache";
+  cacheTag("folders", `folder-${slug}`);
+  cacheLife("hours");
+
   const folder = await prisma.albumFolder.findUnique({
     where: {
       slug: slug,
@@ -81,9 +84,6 @@ export async function getFolderBySlug(
   });
 
   if (!folder) return null;
-
-  cacheTag("folders", `folder-${folder.id}`);
-  cacheLife("hours");
 
   return folder;
 }

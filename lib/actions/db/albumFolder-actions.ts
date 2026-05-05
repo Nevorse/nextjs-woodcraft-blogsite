@@ -149,7 +149,7 @@ export async function deleteFolderById({
       revalidatePath(pathToRevalidate);
     }
 
-    revalidateTag(`folder-${id}`, "max");
+    revalidateTag(`folders-${result.type}`, "max");
 
     return { success: true, id: result.id, title: result.title };
   } catch (error) {
@@ -196,7 +196,7 @@ export async function updateAlbumFolderById({
       revalidatePath(pathToRevalidate);
     }
 
-    revalidateTag(`folder-${id}`, "max");
+    revalidateTag(`folder-${result.slug}`, "max");
 
     return {
       success: true,

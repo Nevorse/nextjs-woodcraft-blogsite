@@ -1,7 +1,7 @@
 "use server";
 import { handleDbActionError } from "@/lib/errorHandler/prisma-error-handler";
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function saveImageToFolder({
   path,
@@ -25,6 +25,9 @@ export async function saveImageToFolder({
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
+
+    revalidateTag("folders", "max");
+
     return { success: true, count: 1 };
   } catch (error) {
     return handleDbActionError(error, "saveImagesToFolder");
@@ -72,6 +75,8 @@ export async function saveImagesToAlbum({
       revalidatePath(pathToRevalidate);
     }
 
+    revalidateTag("albums", "max");
+
     return { success: true, count: result.count };
   } catch (error) {
     return handleDbActionError(error, "saveImagesToAlbum");
@@ -104,6 +109,8 @@ export async function removeImagesFromAlbum({
 
     if (pathToRevalidate) revalidatePath(pathToRevalidate);
 
+    revalidateTag("albums", "max");
+
     return { success: true, count };
   } catch (error) {
     return handleDbActionError(error, "removeImagesFromAlbum");
@@ -120,9 +127,11 @@ export async function updateImageOrders({
   try {
     if (!images || images.length === 0)
       return { success: false, error: "Resim listesi boş." };
-    
+
     // data "desc" ile alındığı için toReversed() gerekli
-    const newOrders = images.toReversed().map((image, index) => ({ id: image.id, order: index }));
+    const newOrders = images
+      .toReversed()
+      .map((image, index) => ({ id: image.id, order: index }));
 
     await prisma.$transaction(
       newOrders.map(({ id, order }) =>
@@ -136,6 +145,8 @@ export async function updateImageOrders({
     if (pathToRevalidate) {
       revalidatePath(pathToRevalidate);
     }
+
+    revalidateTag("albums", "max");
 
     return { success: true };
   } catch (error) {

@@ -4,7 +4,6 @@ import Image from "next/image";
 import SubmitButton from "../form/SubmitButton";
 import { removeImagesFromAlbum } from "@/lib/actions/db/image-actions";
 import toast from "react-hot-toast";
-import { usePathname } from "next/navigation";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
@@ -30,8 +29,6 @@ export default function AdminImageCard({
   errorMessage,
   isPrimaryImage = false,
 }: AdminImageCardProps) {
-  const pathname = usePathname();
-
   const deleteImageFromBucket: () => Promise<
     { success: false; error: string } | { success: true; successPaths: string[] }
   > = async () => {
@@ -52,7 +49,9 @@ export default function AdminImageCard({
 
     const responseData: DeleteApiResponse = await res.json();
 
-    if (!responseData.success) { return responseData; }
+    if (!responseData.success) {
+      return responseData;
+    }
 
     return {
       success: true,

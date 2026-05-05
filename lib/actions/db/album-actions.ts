@@ -65,7 +65,7 @@ export async function updateAlbumBySlug({
       revalidatePath(pathToRevalidate);
     }
 
-    revalidateTag(`album-${result.id}`, "max");
+    revalidateTag(`album-${slug}`, "max");
 
     return {
       success: true,
@@ -187,7 +187,7 @@ export async function createAlbumForFolder({
       revalidatePath(pathToRevalidate);
     }
 
-    revalidateTag("albums", "max");
+    revalidateTag(`albums-${validAlbumType}`, "max");
 
     return { success: true };
   } catch (error) {
@@ -260,7 +260,7 @@ export async function createStandaloneAlbum({
       revalidatePath(pathToRevalidate);
     }
 
-    revalidateTag("albums", "max");
+    revalidateTag(`albums-${validAlbumType}`, "max");
 
     return { success: true };
   } catch (error) {
@@ -290,7 +290,7 @@ export async function deleteAlbumById({
       revalidatePath(pathToRevalidate);
     }
 
-    revalidateTag("albums", "max");
+    revalidateTag(`albums-${result.type}`, "max");
 
     return { success: true, id: result.id, title: result.title };
   } catch (error) {

@@ -57,6 +57,9 @@ export async function getAlbumsByType({
 
 export async function getAlbumBySlug(slug: string): Promise<AlbumWithContent | null> {
   "use cache";
+  cacheTag("albums", `album-${slug}`);
+  cacheLife("hours");
+
   const album = await prisma.album.findUnique({
     where: {
       slug: slug,
@@ -77,9 +80,6 @@ export async function getAlbumBySlug(slug: string): Promise<AlbumWithContent | n
   });
 
   if (!album) return null;
-
-  cacheTag("albums", `album-${album.id}`);
-  cacheLife("hours");
 
   return {
     ...album,

@@ -6,8 +6,9 @@ export default async function ProjectFolderPage({
 }: {
   params: Promise<{ folderParam: string }>;
 }) {
+
   return (
-    <Suspense>
+    <Suspense fallback={<div>loading...</div>}>
       <ProjectFolderPageInner params={params} />
     </Suspense>
   );

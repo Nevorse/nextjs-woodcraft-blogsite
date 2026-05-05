@@ -21,6 +21,7 @@ export type UpsertSiteSettingsParams = {
   coverTextLimit?: number;
   isRegistrationOpen?: boolean;
 };
+
 export async function upsertSiteSettings({
   data,
   pathToRevalidate,

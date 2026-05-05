@@ -4,7 +4,6 @@ import { useDropzone } from "react-dropzone";
 import { LuUpload as UploadIcon } from "react-icons/lu";
 import toast from "react-hot-toast";
 import { saveImagesToAlbum, saveImageToFolder } from "@/lib/actions/db/image-actions";
-import { usePathname } from "next/navigation";
 import SubmitButton from "../ui/form/SubmitButton";
 import PreviewItem from "./PreviewItem";
 import DndSortableGrid from "../ui/admin/DndSortableGrid";
@@ -43,7 +42,6 @@ export default function ImageDropzone({
 }: ImageDropzoneProps) {
   const previewsRef = useRef<FilePreview[]>([]);
   const [previews, setPreviews] = useState<FilePreview[]>([]);
-  const pathname = usePathname();
   const uploadableStatuses = ["idle", "error"];
 
   // Keep the previews up-to-date with useRef
@@ -215,10 +213,14 @@ export default function ImageDropzone({
           paths: bucketResult.successPaths,
           albumId: parentId,
         })
-      : saveImageToFolder({
-          path: bucketResult.successPaths[0],
-          folderId: parentId,
-        });
+      : xType === "projects"
+        ? saveImageToFolder({
+            path: bucketResult.successPaths[0],
+            folderId: parentId,
+          })
+        : null;
+
+    if (dbAction === null) throw new Error("Folder Type Error");
 
     const dbResult = await dbAction;
 
