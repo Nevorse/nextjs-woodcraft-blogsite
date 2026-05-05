@@ -5,7 +5,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <Suspense
       fallback={
-        <div className="bg-(--theme-primary) w-lvh h-lvh" />
+        <div className="h-lvh w-lvw bg-(--theme-primary)" />
       }
     >
       <AdminLayoutInner>{children}</AdminLayoutInner>

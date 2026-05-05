@@ -1,18 +1,13 @@
 import SignInForm from "./SignInForm";
 import { Toaster } from "react-hot-toast";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/main-layout/navbar";
 import { getSiteSettings } from "@/lib/database/siteSettings";
-import { connection } from "next/server";
+import { getSession } from "@/lib/session";
 
 export default async function AuthPageInner() {
-  await connection();
-  
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getSession();
+
   if (session) {
     redirect("/admin");
   }

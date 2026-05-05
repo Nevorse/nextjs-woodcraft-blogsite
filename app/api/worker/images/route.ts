@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { WorkerDeleteResponse, WorkerUploadResponse } from "@/lib/types/workerTypes";
 import { parseErrorMessage } from "@/lib/errorHandler/api-error-handler";
+import { getSession } from "@/lib/session";
 
 const workerURL = process.env.WORKER_URL;
 const secretKey = process.env.WORKER_SECRET;
@@ -37,9 +36,8 @@ export type DeleteApiResponse =
 
 export async function POST(request: Request): Promise<NextResponse<UploadApiResponse>> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await getSession();
+
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Yetkisiz Erişim" },
@@ -159,9 +157,8 @@ export async function POST(request: Request): Promise<NextResponse<UploadApiResp
 
 export async function DELETE(request: Request): Promise<NextResponse<DeleteApiResponse>> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await getSession();
+
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Yetkisiz Erişim" },

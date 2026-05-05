@@ -1,16 +1,15 @@
 import { Toaster } from "react-hot-toast";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/main-layout/navbar";
-import { connection } from "next/server";
+import { getSession } from "@/lib/session";
 
-export default async function AdminLayoutInner({ children }: { children: React.ReactNode }) {
-  await connection();
-  
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export default async function AdminLayoutInner({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getSession();
+
   if (!session) {
     redirect("/auth");
   }

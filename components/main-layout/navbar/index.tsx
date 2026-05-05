@@ -22,7 +22,6 @@ export type UserType =
   | undefined;
 type NavbarProps = {
   user?: UserType;
-  // authSlot?: React.ReactNode;
 };
 
 export default function Navbar({ user }: NavbarProps) {
@@ -109,7 +108,6 @@ export default function Navbar({ user }: NavbarProps) {
                           closeMobileNavbar={() => setOpenMobileNavbar(false)}
                           isOnAdminPage={isOnAdminPage}
                           user={user}
-                          // authSlot={authSlot}
                         />
                       </div>
                     </motion.div>
@@ -124,7 +122,6 @@ export default function Navbar({ user }: NavbarProps) {
               className="opacity-0 compact:opacity-100"
               isOnAdminPage={isOnAdminPage}
               user={user}
-              // authSlot={authSlot}
             />
           )}
         </div>
@@ -141,7 +138,6 @@ export default function Navbar({ user }: NavbarProps) {
               currentNavItems={currentNavItems}
               isOnAdminPage={isOnAdminPage}
               user={user}
-              // authSlot={authSlot}
             />
           </div>
         </header>

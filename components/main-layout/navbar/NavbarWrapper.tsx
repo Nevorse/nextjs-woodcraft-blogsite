@@ -1,11 +1,9 @@
-import { auth } from "@/lib/auth";
 import Navbar from ".";
-import { headers } from "next/headers";
+import { getSession } from "@/lib/session";
 
 export default async function NavbarWrapper() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+
+  const session = await getSession();
 
   return <Navbar user={session?.user ?? null} />;
 }
