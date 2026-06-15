@@ -24,7 +24,10 @@ export default function CardComponent({
       </SmoothLink>
       <div className="text-2xl my-l overflow-hidden text-(--color-primary)">
         <SmoothLink href={href}>
-          <h1 className="truncate text-left w-fit cursor-pointer underline underline-offset-4 decoration-(--theme-tertiary) decoration-1">
+          <h1 
+          className="truncate text-left w-fit cursor-pointer"
+          // underline underline-offset-4 decoration-(--theme-tertiary) decoration-1
+          >
             {title}
           </h1>
         </SmoothLink>

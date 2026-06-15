@@ -33,7 +33,7 @@
     U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @layer base {
-  :root {
+  /* :root {
     --theme-primary: #d5d2cd;
     --theme-secondary: #b8aea5;
     --theme-tertiary: #9c8b7e;
@@ -42,11 +42,17 @@
     --color-primary: #352d28;
     --color-secondary: #e1dfd9;
     --color-tertiary: #209d50;
-  }
-}
+  } */
+   :root {
+    --theme-primary: #eeeeee;
+    --theme-secondary: #96928e;
+    --theme-tertiary: #404b62;
+    --theme-quaternary: #161515;
 
-* {
-  font-family: "marcellus", serif;
+    --color-primary: #161515;
+    --color-secondary: #ffffff;
+    --color-tertiary: #ed5761;
+   }
 }
 
 @theme inline {
@@ -168,6 +174,12 @@
   }
 }
 
+* {
+  font-family: "marcellus", serif;
+}
+html {
+  scrollbar-gutter: stable;
+}
 /* Uploadcare uploader customisation */
 :where([uc-modal]) dialog[open]::backdrop {
   pointer-events: none;

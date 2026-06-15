@@ -39,7 +39,7 @@ export default async function AdminProjectAlbumPage({
   if (!projectData || !folderData) notFound();
 
   return (
-    <div className="w-[92%] min-h-[90vh] mx-auto my-12">
+    <div className="w-[92%] min-h-[90vh] mx-auto mb-12 mt-6">
       <AdminSingleAlbumClient
         pageType="projects"
         albumData={projectData}

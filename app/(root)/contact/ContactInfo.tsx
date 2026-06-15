@@ -17,7 +17,7 @@ export default function ContactInfo() {
           </div>
 
           <Link target="_blank" href="https://wa.me/905421345623">
-            <div className="flex flex-col items-center gap-4 hover:text-green-500/90">
+            <div className="flex flex-col items-center gap-4 hover:text-(--color-tertiary)">
               <FaWhatsapp className="w-8 h-8" />
               <p className="text-2xl font-medium font-sans!">+90 542 134 5623</p>
             </div>
@@ -29,7 +29,7 @@ export default function ContactInfo() {
           </div>
 
           <Link target="_blank" href="https://instagram.com/ozgurahsapdekorasyon">
-            <div className="flex flex-col items-center gap-4 hover:text-green-500/90">
+            <div className="flex flex-col items-center gap-4 hover:text-(--color-tertiary)">
               <IoLogoInstagram className="w-8 h-8" />
               <p className="text-2xl font-medium font-sans!">
                 /ozgurahsapdekorasyon
@@ -41,7 +41,7 @@ export default function ContactInfo() {
         // Mobile
         <>
           <Link href="tel:+905421345623">
-            <div className="flex flex-col items-center gap-4 hover:text-green-500/90">
+            <div className="flex flex-col items-center gap-4 hover:text-(--color-tertiary)">
               <FaPhoneAlt className="w-8 h-8" />
               <p className="text-2xl font-medium underline underline-offset-[6px] font-sans">
                 +90 542 134 5623
@@ -49,7 +49,7 @@ export default function ContactInfo() {
             </div>
           </Link>
           <Link target="_blank" href="https://wa.me/905421345623">
-            <div className="flex flex-col items-center gap-4 hover:text-green-500/90">
+            <div className="flex flex-col items-center gap-4 hover:text-(--color-tertiary)">
               <FaWhatsapp className="w-8 h-8" />
               <p className="text-2xl font-medium underline underline-offset-[6px] font-sans">
                 +90 542 134 5623
@@ -63,7 +63,7 @@ export default function ContactInfo() {
           </div>
 
           <Link target="_blank" href="https://instagram.com/ozgurahsapdekorasyon">
-            <div className="flex flex-col items-center gap-4 hover:text-green-500/90">
+            <div className="flex flex-col items-center gap-4 hover:text-(--color-tertiary)">
               <IoLogoInstagram className="w-8 h-8" />
               <p className="text-2xl font-medium underline underline-offset-[6px] font-sans">
                 /ozgurahsapdekorasyon

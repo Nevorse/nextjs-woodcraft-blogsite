@@ -169,7 +169,7 @@ export default function AdminSingleAlbumClient({
   return (
     <>
       <div className="flex justify-between gap-12">
-        <div className="text-[28px] mb-8 font-semibold tracking-wider">
+        <div className="text-[28px] mb-8 font-semibold tracking-wider w-2/3">
           <span className="invisible block h-0 px-2">{titleState || " "}</span>
           <Input
             name="title"

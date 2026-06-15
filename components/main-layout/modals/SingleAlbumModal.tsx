@@ -42,6 +42,23 @@ export default function SingleAlbumModal({
   };
 
   useEffect(() => {
+    // scrollbar-gutter'ı kapat, yoksa modal'da gap kalır
+    if (true) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+      document.documentElement.style.scrollbarGutter = "auto";
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      document.documentElement.style.scrollbarGutter = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, []);
+
+  useEffect(() => {
     // Disable scrolling when the modal is open
     document.body.style.overflow = "hidden";
     return () => {

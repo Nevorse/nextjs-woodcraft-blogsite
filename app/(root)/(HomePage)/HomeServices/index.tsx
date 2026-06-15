@@ -4,6 +4,7 @@ import { AlbumType } from "@/lib/generated/prisma/enums";
 import { getSiteSettings } from "@/lib/database/siteSettings";
 import { Suspense } from "react";
 import HomeServicesSliderSkeleton from "./HomeServicesSkeleton";
+// import NewHomeServicesSlider from "./NewHSS";
 
 export default async function HomeServices() {
   const siteSettings = await getSiteSettings({ serviceAlbumLimit: true });
@@ -23,6 +24,7 @@ export default async function HomeServices() {
       </div>
       <Suspense fallback={<HomeServicesSliderSkeleton />}>
         <HomeServicesSlider slideData={albumsData} />
+        {/* <NewHomeServicesSlider slideData={albumsData} /> */}
       </Suspense>
     </div>
   );

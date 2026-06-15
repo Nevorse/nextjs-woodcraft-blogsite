@@ -48,15 +48,36 @@ export default function HomeSlider({
             imgIndex === imageIndex && "opacity-100",
           )}
         >
-          <div className="bg-black/35 w-full h-full absolute" />
+          {/* <div className="bg-black/30 w-full h-full absolute" /> */}
         </div>
       ))}
 
       <div
-        className="absolute inset-0 text-left top-[40%] w-[90%] mx-auto text-(--color-secondary)
-        xl:text-4xl md:text-4xl text-2xl font-semibold transition-all opacity-95"
+        className="absolute flex items-end inset-0 text-white
+  xl:text-4xl md:text-4xl text-2xl font-semibold transition-all opacity-95"
       >
-        {coverTexts[`content-${textIndex}`] || ""}
+        <div className="relative w-1/2 pl-15 pr-20 pb-10 pt-10 text-left">
+          {/* Arka plan  */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              maskImage: `
+                linear-gradient(to right, black 50%, transparent),
+                linear-gradient(to top,   black 20%, transparent)
+              `,
+              maskComposite: "intersect",
+              WebkitMaskImage: `
+                linear-gradient(to right, black 50%, transparent),
+                linear-gradient(to top,   black 20%, transparent)
+              `,
+              WebkitMaskComposite: "destination-in",
+            }}
+          />
+          <h1 className="relative drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+            {coverTexts[`content-${textIndex}`] || ""}
+          </h1>
+        </div>
       </div>
     </div>
   );
