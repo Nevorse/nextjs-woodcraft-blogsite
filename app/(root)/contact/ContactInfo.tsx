@@ -25,7 +25,7 @@ export default function ContactInfo() {
 
           <div className="flex flex-col items-center gap-4">
             <IoIosMail className="w-8 h-8" />
-            <p className="text-2xl font-medium font-sans!">info@ozgurahsap.com</p>
+            <p className="text-2xl font-medium font-sans!">ahsapozgur@gmail.com</p>
           </div>
 
           <Link target="_blank" href="https://instagram.com/ozgurahsapdekorasyon">
@@ -59,7 +59,7 @@ export default function ContactInfo() {
 
           <div className="flex flex-col items-center gap-4">
             <IoIosMail className="w-8 h-8" />
-            <p className="text-2xl font-medium font-sans">info@ozgurahsap.com</p>
+            <p className="text-2xl font-medium font-sans">ahsapozgur@gmail.com</p>
           </div>
 
           <Link target="_blank" href="https://instagram.com/ozgurahsapdekorasyon">

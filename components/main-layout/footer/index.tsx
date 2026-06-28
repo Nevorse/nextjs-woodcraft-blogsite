@@ -43,7 +43,7 @@ export default function Footer() {
 
             <div className="flex gap-3 items-center">
               <IoIosMail className="w-5 h-5" />
-              <p className="text-lg font-medium font-sans!">info@ozgurahsap.com</p>
+              <p className="text-lg font-medium font-sans!">ahsapozgur@gmail.com</p>
             </div>
 
             <Link
