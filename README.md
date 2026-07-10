@@ -1,8 +1,8 @@
 # E-commerce Web UI
 
-[![Live Site](https://img.shields.io/badge/demo-live-brightgreen)](https://www.ozgurahsap.com/)
-
-[![Vercel Live Demo](https://img.shields.io/badge/deployed%20on-Vercel-black?logo=vercel)](https://nextjs-woodcraft-blogsite.vercel.app)
+| 🌐 Live Site | 🚀 Vercel Live Demo |
+|---|---|
+| [ozgurahsap.com](https://ozgurahsap.com) | [nextjs-woodcraft-blogsite.vercel.app](https://nextjs-woodcraft-blogsite.vercel.app) |
 
 
 ## Tech Stack
